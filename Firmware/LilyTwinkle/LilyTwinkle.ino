@@ -69,50 +69,19 @@ int pin1FadeCycleCompletionCount = 0;
 boolean waitingToCelebrate = false; // Are we waiting to celebrate?
 boolean celebrate = false; // Are we celebrating right now?
 int celebrationRoll = 0;  // Holds the magic number to match for celebrations.
+boolean celebrationPeak = false; // Keep track what phase of the celebration phase we're in.
 
+const int numberOfLEDs = 5;
+int fadeTimer[numberOfLEDs] = { 10, 10, 10, 10, 10 };
+byte onTime[numberOfLEDs] = { 0, 0, 0, 0, 0 };
+byte onCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
+int fadeCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
+char dir[numberOfLEDs] = { 1, 1, 1, 1, 1 };
+byte limit[numberOfLEDs] = { 255, 255, 255, 255, 255 };
+boolean enable[numberOfLEDs] = { true, true, true, true, true };
 
 long delayTime = 50; 
 long startTime = 0;
-
-byte onTime0 = 0;
-byte onCounter0 = 0; 
-byte limit0 = 255;
-char dir0 = 1;
-boolean enable0 = true;
-int fadeTimer0 = 10;
-int fadeCounter0 = 0;
-
-byte onTime1 = 0;
-byte onCounter1 = 0;
-byte limit1 = 255;
-char dir1 = 1;
-boolean enable1 = true;
-int fadeTimer1 = 10;
-int fadeCounter1 = 0;
-
-byte onTime2 = 0;
-byte onCounter2 = 0;
-byte limit2 = 255;
-char dir2 = 1;
-boolean enable2 = true;
-int fadeTimer2 = 10;
-int fadeCounter2 = 0;
-
-byte onTime3 = 0;
-byte onCounter3 = 0;
-byte limit3 = 255;
-char dir3 = 1;
-boolean enable3 = true;
-int fadeTimer3 = 10;
-int fadeCounter3 = 0;
-
-byte onTime4 = 0;
-byte onCounter4 = 0;
-byte limit4 = 255;
-char dir4 = 1;
-boolean enable4 = true;
-int fadeTimer4 = 10;
-int fadeCounter4 = 0;
 
 void setup()  { 
   randomSeed(analogRead(3));
@@ -133,119 +102,107 @@ void loop()
     startTime = currTime;
 
     // Check to see if we're waiting to celebrate, and if everyone has arrived.
-    if ((waitingToCelebrate) && (enable0 == false) && (enable1 == false) && (enable2 == false) && (enable3 == false) && (enable4 == false)) {
+    if ((waitingToCelebrate) && (enable[0] == false) && (enable[1] == false) && (enable[2] == false) && (enable[3] == false) && (enable[4] == false)) {
       celebrate = true;
       waitingToCelebrate = false;
 
-      fadeTimer0 = 500; // Set every LED to have a very slow next fade.
-      fadeTimer1 = 500; 
-      fadeTimer2 = 500; 
-      fadeTimer3 = 500; 
-      fadeTimer4 = 500;
-      // Reset all counters so that everyone fades from the start.
-      onTime0 = 0;		// reset pwm counter.
-      onTime1 = 0;
-      onTime2 = 0;
-      onTime3 = 0;
-      onTime4 = 0;
-      onCounter0 = 0;		// Say we've been on for 0 time.
-      onCounter1 = 0;
-      onCounter2 = 0;
-      onCounter3 = 0;
-      onCounter4 = 0;
-      fadeCounter0 = 0;	// Say we've been PWMing for no time
-      fadeCounter1 = 0;
-      fadeCounter2 = 0;
-      fadeCounter3 = 0;
-      fadeCounter4 = 0;
-      dir0 = 1;	// Ensures the celebration fade direction is up.
-      dir1 = 1;
-      dir2 = 1;
-      dir3 = 1;
-      dir4 = 1;
-      limit0 = 255; // Celebration fade can reach max brightness
-      limit1 = 255;
-      limit2 = 255;
-      limit3 = 255;
-      limit4 = 255;
-
-      enable0 = true; // Everyone START CELEBRATING!!!!!!!!!!!!!
-      enable1 = true;
-      enable2 = true;
-      enable3 = true;
-      enable4 = true;
+      byte i;
+      for (i = 0; i < numberOfLEDs; i++) {
+        fadeTimer[i] = 500; // Set every LED to have a very slow next fade.
+        onTime[i] = 0;  // reset pwm counter.
+        fadeCounter[i] = 0;
+        dir[i] = 1;
+        limit[i] = 255;
+        enable[i] = true;
+      }
     }
     
     // LED0 section
-    if (!enable0)                  digitalWrite(LED0, LOW);
-    else if (onCounter0 > onTime0) digitalWrite(LED0, LOW);
+    if (!enable[0])                  digitalWrite(LED0, LOW);
+    else if (onCounter[0] > onTime[0]) digitalWrite(LED0, LOW);
     else                           digitalWrite(LED0, HIGH);
 
-    onCounter0++;
-    fadeCounter0++;
+    onCounter[0]++;
+    fadeCounter[0]++;
 
-    if (fadeCounter0 == fadeTimer0)
+    if (fadeCounter[0] == fadeTimer[0])
     {
-      fadeCounter0 = 0;
-      onTime0 += dir0;
+      fadeCounter[0] = 0;
+      onTime[0] += dir[0];
       
-      if ((onTime0 == limit0) || (onTime0 == 0)) dir0 *= -1;
-      if ((onTime0 == 0) && (dir0 = 1))
+      // if ((celebrate) && (!celebrationPeak) && (onTime[0] == limit[0])){
+      //   celebrationPeak = true; // Initial celebration ramp-up completed.
+      //                            // Commence next phase.
+      //   delay(5000); // Hold
+      //   celebrationPeak = false;
+     // } else 
+      if ((onTime[0] == limit[0]) || (onTime[0] == 0)) dir[0] *= -1;
+
+      // End of a fade cycle when the LED was on.
+      if ((onTime[0] == 0) && (dir[0] = 1))
       {
-        limit0 =     random(LIMITMIN0,LIMITMAX0); // pin-specific brightness values
-        fadeTimer0 = random(fadeMinDynamic0,fadeMaxDynamic0); // pin specific dynamic-fade speed variables
+        limit[0] =     random(LIMITMIN0,LIMITMAX0); // pin-specific brightness values
+        fadeTimer[0] = random(fadeMinDynamic0,fadeMaxDynamic0); // pin specific dynamic-fade speed variables
         
+        if (celebrate) {
+          // The celebration fade is over. That was fun.
+          // Time to go home.
+          celebrate = false;
+          celebrationRoll = 500; // Next celebration in 500 cycles
+        }
+
         if (waitingToCelebrate) {
-          enable0 = false;
+          enable[0] = false;
         }
         else if (fastMode) {
-          enable0 = true;
+          enable[0] = true;
         } 
         else {
           // As long as we're not waiting to celebrate,
           // and it's not fast mode,
-          // then roll another dice.
-          enable0 =  random(0,fadeTrueDynamic0+1) >= fadeFalseDynamic0;
+          // then roll another die.
+          enable[0] =  random(0,fadeTrueDynamic0+1) >= fadeFalseDynamic0;
         }
       }
     }
      
   //  LED1 section-----------------------------------------------------------------
-    if (!enable1)                   digitalWrite(LED1, LOW);
-    else if (onCounter1 > onTime1) digitalWrite(LED1, LOW);
+    if (!enable[1])                   digitalWrite(LED1, LOW);
+    else if (onCounter[1] > onTime[1]) digitalWrite(LED1, LOW);
     else                           digitalWrite(LED1, HIGH);
-    onCounter1++;
-    fadeCounter1++;
-    if (fadeCounter1 == fadeTimer1)
+    onCounter[1]++;
+    fadeCounter[1]++;
+    if (fadeCounter[1] == fadeTimer[1])
     {
-      fadeCounter1 = 0;
-      onTime1 += dir1;
-      if ((onTime1 == limit1) || (onTime1 == 0)) dir1 *= -1;
-      if ((onTime1 == 0) && (dir1 = 1))
+      fadeCounter[1] = 0;
+      onTime[1] += dir[1];
+      if ((onTime[1] == limit[1]) || (onTime[1] == 0)) dir[1] *= -1;
+      if ((onTime[1] == 0) && (dir[1] = 1))
       {
-        limit1 =     random(LIMITMIN1,LIMITMAX1); // pin-specific brightness values
-        fadeTimer1 = random(fadeMinDynamic,fadeMaxDynamic);
+        limit[1] =     random(LIMITMIN1,LIMITMAX1); // pin-specific brightness values
+        fadeTimer[1] = random(fadeMinDynamic,fadeMaxDynamic);
 
 
         if (waitingToCelebrate) {
-          enable1 = false;
+          enable[1] = false;
         }
         else if (fastMode) {
-          enable1 = true;
+          enable[1] = true;
         } 
         else {
-          enable1 = random(0,fadeTrueDynamic+1) >= fadeFalseDynamic;
+          enable[1] = random(0,fadeTrueDynamic+1) >= fadeFalseDynamic;
         }
 
         // fade-cycle completions counter.
         // Only triggers at the end of a full fade cycle when the LED was on.
-        if (enable1) {
+        if (enable[1]) {
 
-          // If we're celebrating then don't bother drinking any coffee.
+          // Only increment the fast mode counter if celebration-mode flags are false
           if ((!celebrate) && (!waitingToCelebrate)) {
             pin1FadeCycleCompletionCount++;
+          }
 
-            if (pin1FadeCycleCompletionCount == fastModeCycleCountTrigger) {
+          if (pin1FadeCycleCompletionCount == fastModeCycleCountTrigger) {
             // ON THE nth FADE
             // Give everyone coffee!!!!!!!!!!!!!!!!!!!!!!!
             fadeTrueDynamic = FADETRUEFAST;
@@ -256,119 +213,120 @@ void loop()
             fadeMaxDynamic0 = FADEMAXFAST;
             fadeFalseDynamic0 = FADEFALSEFAST;  // pin-specific dynamic dice roll
             fadeTrueDynamic0 = FADETRUEFAST;
-            fadeTimer0 = random(fadeMinDynamic,fadeMaxDynamic); // Hijack LED0's fade timer just in case it's
+            fadeTimer[0] = random(fadeMinDynamic,fadeMaxDynamic); // Hijack LED0's fade timer just in case it's
                           // in the middle of a really long fade. Replace it with something short. That way it
                           // will coffee too!!!!
-            enable0 = true;
-            enable1 = true;
-            enable2 = true;
-            enable3 = true;
-            enable4 = true;
-            }
-            if (pin1FadeCycleCompletionCount == 11) {
-              // Uh oh coffee has worn off eveyrone is sleepy.
-              fadeTrueDynamic = FADETRUE;
-              fadeFalseDynamic = FADEFALSE;
-              fadeMinDynamic = FADEMIN;
-              fadeMaxDynamic = FADEMAX;
-              fadeMinDynamic0 = FADEMIN0; // pin-specific dynamic fade speed variable
-              fadeMaxDynamic0 = FADEMAX0;
-              pin1FadeCycleCompletionCount = 0;
-              fastModeCycleCountTrigger = random(FASTMODECYCLETRIGGERMIN, FASTMODECYCLETRIGGERMAX); // After how many loops will fast mode trigger again?
+            byte i;
+            for (i = 0; i < numberOfLEDs; i++) {
+              enable[i] = true; // turn every LED on.
             }
           }
+
+          if (pin1FadeCycleCompletionCount == 11) {
+            // Uh oh coffee has worn off eveyrone is sleepy.
+            fadeTrueDynamic = FADETRUE;
+            fadeFalseDynamic = FADEFALSE;
+            fadeMinDynamic = FADEMIN;
+            fadeMaxDynamic = FADEMAX;
+            fadeMinDynamic0 = FADEMIN0; // pin-specific dynamic fade speed variable
+            fadeMaxDynamic0 = FADEMAX0;
+            pin1FadeCycleCompletionCount = 0;
+            fastModeCycleCountTrigger = random(FASTMODECYCLETRIGGERMIN, FASTMODECYCLETRIGGERMAX); // How many LED1 fade cycles until fast mode again?
+          }
+          
         }
+
         // After every fade cycle, increment celebration dice roll
         celebrationRoll++;
         // Now we celebrate
         if (celebrationRoll == 25) {
-          waitingToCelebrate = true; // Inform everyone to gather for the celebration!
+          waitingToCelebrate = true; // Inform everyone it's time to gather for the celebration!
         }
       }
     }
 
   //  LED2 section-----------------------------------------------------------------
-    if (!enable2)                   digitalWrite(LED2, LOW);
-    else if (onCounter2 > onTime2) digitalWrite(LED2, LOW);
+    if (!enable[2])                   digitalWrite(LED2, LOW);
+    else if (onCounter[2] > onTime[2]) digitalWrite(LED2, LOW);
     else                           digitalWrite(LED2, HIGH);
-    onCounter2++;
-    fadeCounter2++;
-    if (fadeCounter2 == fadeTimer2)
+    onCounter[2]++;
+    fadeCounter[2]++;
+    if (fadeCounter[2] == fadeTimer[2])
     {
-      fadeCounter2 = 0;
-      onTime2 += dir2;
-      if ((onTime2 == limit2) || (onTime2 == 0)) dir2 *= -1;
-      if ((onTime2 == 0) && (dir2 = 1))
+      fadeCounter[2] = 0;
+      onTime[2] += dir[2];
+      if ((onTime[2] == limit[2]) || (onTime[2] == 0)) dir[2] *= -1;
+      if ((onTime[2] == 0) && (dir[2] = 1))
       {
-        limit2 =     random(LIMITMIN,LIMITMAX);
-        fadeTimer2 = random(fadeMinDynamic,fadeMaxDynamic);
+        limit[2] =     random(LIMITMIN,LIMITMAX);
+        fadeTimer[2] = random(fadeMinDynamic,fadeMaxDynamic);
 
         if (waitingToCelebrate) {
-          enable2 = false;
+          enable[2] = false;
         }
         else if (fastMode) {
-          enable2 = true;
+          enable[2] = true;
         } 
         else {
-          enable2 =  random(0,fadeTrueDynamic+1) >= fadeFalseDynamic;
+          enable[2] =  random(0,fadeTrueDynamic+1) >= fadeFalseDynamic;
         }
         
       }
     }
   
   //  LED3 section-----------------------------------------------------------------
-    if (!enable3)                   digitalWrite(LED3, LOW);
-    else if (onCounter3 > onTime3) digitalWrite(LED3, LOW);
+    if (!enable[3])                   digitalWrite(LED3, LOW);
+    else if (onCounter[3] > onTime[3]) digitalWrite(LED3, LOW);
     else                           digitalWrite(LED3, HIGH);
-    onCounter3++;
-    fadeCounter3++;
-    if (fadeCounter3 == fadeTimer3)
+    onCounter[3]++;
+    fadeCounter[3]++;
+    if (fadeCounter[3] == fadeTimer[3])
     {
-      fadeCounter3 = 0;
-      onTime3 += dir3;
-      if ((onTime3 == limit3) || (onTime3 == 0)) dir3 *= -1;
-      if ((onTime3 == 0) && (dir3 = 1))
+      fadeCounter[3] = 0;
+      onTime[3] += dir[3];
+      if ((onTime[3] == limit[3]) || (onTime[3] == 0)) dir[3] *= -1;
+      if ((onTime[3] == 0) && (dir[3] = 1))
       {
-        limit3 =     random(LIMITMIN,LIMITMAX);
-        fadeTimer3 = random(fadeMinDynamic,fadeMaxDynamic);
+        limit[3] =     random(LIMITMIN,LIMITMAX);
+        fadeTimer[3] = random(fadeMinDynamic,fadeMaxDynamic);
 
         if (waitingToCelebrate) {
-          enable3 = false;
+          enable[3] = false;
         }
         else if (fastMode) {
-          enable3 = true;
+          enable[3] = true;
         } 
         else {
-          enable3 = random(0,fadeTrueDynamic+1) >= fadeFalseDynamic;
+          enable[3] = random(0,fadeTrueDynamic+1) >= fadeFalseDynamic;
         }
         
       }
     }
 
   //  LED4 section-----------------------------------------------------------------
-    if (!enable4)                   digitalWrite(LED4, LOW);
-    else if (onCounter4 > onTime4) digitalWrite(LED4, LOW);
+    if (!enable[4])                   digitalWrite(LED4, LOW);
+    else if (onCounter[4] > onTime[4]) digitalWrite(LED4, LOW);
     else                           digitalWrite(LED4, HIGH);
-    onCounter4++;
-    fadeCounter4++;
-    if (fadeCounter4 == fadeTimer4)
+    onCounter[4]++;
+    fadeCounter[4]++;
+    if (fadeCounter[4] == fadeTimer[4])
     {
-      fadeCounter4 = 0;
-      onTime4 += dir4;
-      if ((onTime4 == limit4) || (onTime4 == 0)) dir4 *= -1;
-      if ((onTime4 == 0) && (dir4 = 1))
+      fadeCounter[4] = 0;
+      onTime[4] += dir[4];
+      if ((onTime[4] == limit[4]) || (onTime[4] == 0)) dir[4] *= -1;
+      if ((onTime[4] == 0) && (dir[4] = 1))
       {
-        limit4 =     random(LIMITMIN,LIMITMAX);
-        fadeTimer4 = random(fadeMinDynamic,fadeMaxDynamic);
+        limit[4] =     random(LIMITMIN,LIMITMAX);
+        fadeTimer[4] = random(fadeMinDynamic,fadeMaxDynamic);
 
         if (waitingToCelebrate) {
-          enable4 = false;
+          enable[4] = false;
         }
         else if (fastMode) {
-          enable4 = true;
+          enable[4] = true;
         } 
         else {
-          enable4 = random(0,fadeTrueDynamic+1) >= fadeFalseDynamic;
+          enable[4] = random(0,fadeTrueDynamic+1) >= fadeFalseDynamic;
         }
         
       }
