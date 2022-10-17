@@ -197,7 +197,8 @@ void loop() {
         celebrationPeak = true;  // Set "peak-phase" flag.
 
         // Do something different.
-        limitMinDynamic = 230;   // The minimum brightness the LED can get is equal to the max. This a pulsing effectg
+        limitMinDynamic = 230;  // The minimum brightness the LED can get is equal
+                                // to the max. This a pulsing effect
         limitMaxDynamic = 230;
         limitMinDynamic0 = 230;
         limitMaxDynamic0 = 230;
