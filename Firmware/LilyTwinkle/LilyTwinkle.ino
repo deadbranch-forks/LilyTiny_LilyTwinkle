@@ -95,8 +95,8 @@ byte celebrationPeakDirection = 0;
 int celebrationPeakCount = 0;
 boolean celebrationPeakDirectionMax = false;
 
-const int numberOfLEDs = 5; // Number of LED GPIO pins
-int fadeTimer[numberOfLEDs] = { 10, 10, 10, 10, 10 }; // Value of variable for each LED n
+const int numberOfLEDs = 5;                            // Number of LED GPIO pins
+int fadeTimer[numberOfLEDs] = { 10, 10, 10, 10, 10 };  // Value of variable for each LED n
 byte onTime[numberOfLEDs] = { 0, 0, 0, 0, 0 };
 byte onCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
 int fadeCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
@@ -126,7 +126,7 @@ void setup() {
   pinMode(LED4, OUTPUT);
   startTime = micros();
 
-// OLED stuff
+  // OLED stuff
   Wire.begin();
   Wire.setClock(400000L);
 
@@ -137,7 +137,6 @@ void setup() {
 #endif  // RST_PIN >= 0
   oled.setFont(System5x7);
   oled.displayRemap(true);
-
 }
 
 void loop() {
@@ -146,7 +145,7 @@ void loop() {
   if ((currTime - startTime) > delayTime) {
     startTime = currTime;
 
-// OLED stuff
+    // OLED stuff
     oled.clear();
     oled.print("Coffee: ");
     oled.print(pin1FadeCycleCompletionCount);
@@ -159,21 +158,21 @@ void loop() {
     oled.println(celebrate);
     oled.println("Waiting to celebrate: ");
     oled.print(waitingToCelebrate);
-// end OLED stuff
+    // end OLED stuff
 
     // Check to see if we're waiting to celebrate, and if everyone has arrived.
     if ((waitingToCelebrate) && (!enable[0]) && (!enable[1]) && (!enable[2]) && (!enable[3]) && (!enable[4])) {
-      waitingToCelebrate = false; // We're not waiting anymore!!
-      celebrate = true; // Start celebrating
+      waitingToCelebrate = false;  // We're not waiting anymore!!
+      celebrate = true;            // Start celebrating
 
       // Every LED has enable[n] == false. Modify fade-setting values for
       // synchronised a long slow fade-up.
       byte i;
       for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-        fadeTimer[i] = 500;   // Set very slow fade rate
-        onTime[i] = 0;        // reset pwm counter.
-        fadeCounter[i] = 0;   // Reset fade-position counter
-        dir[i] = 1;           // Direction now = forward
+        fadeTimer[i] = 500;                 // Set very slow fade rate
+        onTime[i] = 0;                      // reset pwm counter.
+        fadeCounter[i] = 0;                 // Reset fade-position counter
+        dir[i] = 1;                         // Direction now = forward
         limit[i] = 255;
         enable[i] = true;
       }
@@ -191,9 +190,9 @@ void loop() {
       fadeCounter[0] = 0;
       onTime[0] += dir[0];
 
-      // Fade direction has changed, thus we're at peak brightness. 
+      // Fade direction has changed, thus we're at peak brightness.
       // Ensure we're celebrating, then do something different.
-      if ((celebrate) && (!celebrationPeak) && (onTime[0] == limit[0])) { 
+      if ((celebrate) && (!celebrationPeak) && (onTime[0] == limit[0])) {
         celebrationPeak = true;  // Set "peak-phase" flag.
 
         // Do something different.
@@ -348,11 +347,11 @@ void loop() {
                                                                     // will coffee too!!!!
             byte i;
             for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-              enable[i] = true;  // Turn each on.
+              enable[i] = true;                   // Turn each on.
             }
           }
 
-          if (pin1FadeCycleCompletionCount == 11) { // Uh oh coffee has worn off eveyrone is sleepy.
+          if (pin1FadeCycleCompletionCount == 11) {  // Uh oh coffee has worn off eveyrone is sleepy.
             fadeTrueDynamic = FADETRUE;
             fadeFalseDynamic = FADEFALSE;
             fadeMinDynamic = FADEMIN;
