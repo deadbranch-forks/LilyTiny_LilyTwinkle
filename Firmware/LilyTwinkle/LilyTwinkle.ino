@@ -166,7 +166,8 @@ void loop() {
       waitingToCelebrate = false; // We're not waiting anymore!!
       celebrate = true; // Start celebrating
 
-      // Change fade values for each LED while we're celebrating.
+      // Every LED has enable[n] == false. Modify fade-setting values for
+      // synchronised a long slow fade-up.
       byte i;
       for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
         fadeTimer[i] = 500;   // Set very slow fade rate
@@ -190,9 +191,12 @@ void loop() {
       fadeCounter[0] = 0;
       onTime[0] += dir[0];
 
-      if ((celebrate) && (!celebrationPeak) && (onTime[0] == limit[0])) {
-        celebrationPeak = true;  // Initial celebration ramp-up completed.
-                                 // Commence next phase.
+      // Fade direction has changed, thus we're at peak brightness. 
+      // Ensure we're celebrating, then do something different.
+      if ((celebrate) && (!celebrationPeak) && (onTime[0] == limit[0])) { 
+        celebrationPeak = true;  // Set "peak-phase" flag.
+
+        // Do something different.
         limitMinDynamic = 230;   // The minimum brightness the LED can get is equal to the max. This a pulsing effectg
         limitMaxDynamic = 230;
         limitMinDynamic0 = 230;
