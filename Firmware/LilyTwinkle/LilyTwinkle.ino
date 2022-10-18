@@ -5,21 +5,6 @@
 //  is necessary to program the fuse bits to disable the divide-by-8
 //  on the clock frequency.
 
-// OLED stuff
-// Test for minimum program size.
-#define RTN_CHECK 1
-
-#include <Wire.h>
-#include "SSD1306Ascii.h"
-#include "SSD1306AsciiWire.h"
-// 0X3C+SA0 - 0x3C or 0x3D
-#define I2C_ADDRESS 0x3C
-// Define proper RST_PIN if required.
-#define RST_PIN -1
-SSD1306AsciiWire oled;
-//
-// End OLED stuff
-
 // ATtiny85 pin definitions
 // #define LED0 0
 // #define LED1 1
@@ -46,7 +31,6 @@ SSD1306AsciiWire oled;
 #define LIMITMAX0 255
 #define LIMITMIN1 230  // LED 1 brightness limit
 #define LIMITMAX1 255
-
 #define FADEMIN0 150  // LED0 gets a different fade rate than everyone else.
 #define FADEMAX0 355
 #define FADEFALSE0 10  // LED0 rolls enable more often
@@ -95,7 +79,7 @@ byte celebrationPeakDirection = 0;
 int celebrationPeakCount = 0;
 boolean celebrationPeakDirectionMax = false;
 
-const int numberOfLEDs = 5;                            // Number of LED GPIO pins
+const int numberOfLEDs = 5;          // Number of LED GPIO pins
 // Constant replacement arrays
 int dynamicFadeMin[numberOfLEDs] = { FADEMIN, FADEMIN, FADEMIN, FADEMIN, FADEMIN };
 int dynamicFadeMax[numberOfLEDs] = { FADEMAX, FADEMAX, FADEMAX, FADEMAX, FADEMAX };       // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
@@ -107,15 +91,6 @@ int fadeCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
 char dir[numberOfLEDs] = { 1, 1, 1, 1, 1 };
 byte limit[numberOfLEDs] = { 255, 255, 255, 255, 255 };
 boolean enable[numberOfLEDs] = { true, true, true, true, true };
-
-// OLED stuff
-// keep a record of what the last known state of celebrate was
-boolean lastCelebrateState = celebrate;
-// Same for coffee
-boolean lastCoffeeState = fastMode;
-int lastpin1FadeCycleCompletionCount = 0;
-int lastfastModeCycleCountTrigger = 0;
-int lastcelebrationRoll = 0;
 
 // Wait in microseconds before allowing loop() to process again
 long delayTime = 50;
@@ -130,39 +105,12 @@ void setup() {
   pinMode(LED4, OUTPUT);
   startTime = micros();
 
-// OLED stuff
-  Wire.begin();
-  Wire.setClock(400000L);
-
-#if RST_PIN >= 0
-  oled.begin(&Adafruit128x32, I2C_ADDRESS, RST_PIN);
-#else   // RST_PIN >= 0
-  oled.begin(&Adafruit128x32, I2C_ADDRESS);
-#endif  // RST_PIN >= 0
-  oled.setFont(System5x7);
-  oled.displayRemap(true);
-}
 
 void loop() {
   long currTime = micros();
 
   if ((currTime - startTime) > delayTime) {
     startTime = currTime;
-
-    // OLED stuff
-    oled.clear();
-    oled.print("Coffee: ");
-    oled.print(pin1FadeCycleCompletionCount);
-    oled.println("/");
-    oled.print(fastModeCycleCountTrigger);
-    oled.print("Celebration: ");
-    oled.print(celebrationRoll);
-    oled.print("/25 | ");
-    oled.print("Celebrating: ");
-    oled.println(celebrate);
-    oled.println("Waiting to celebrate: ");
-    oled.print(waitingToCelebrate);
-    // end OLED stuff
 
     // Check to see if we're waiting to celebrate, and if everyone has arrived.
     if ((waitingToCelebrate) && (!enable[0]) && (!enable[1]) && (!enable[2]) && (!enable[3]) && (!enable[4])) {
@@ -310,7 +258,7 @@ void loop() {
     else if (onCounter[1] > onTime[1]) digitalWrite(LED1, LOW);
     else digitalWrite(LED1, HIGH);
 
-onCounter[1]++;
+    onCounter[1]++;
     fadeCounter[1]++;
     if (fadeCounter[1] == fadeTimer[1]) {
       fadeCounter[1] = 0;
@@ -330,15 +278,19 @@ onCounter[1]++;
           enable[1] = random(0, fadeTrueDynamic + 1) >= fadeFalseDynamic;
         }
 
-        if (enable[1]) {  // Only triggers at the end of a full fade cycle when the LED was on.
+        // fade-cycle completions counter.
+        // Only triggers at the end of a full fade cycle when the LED was on.
+        if (enable[1]) {
+          
           // Only increment the fast mode counter if celebration-mode flags are false
           // and not already in fast mode.
           if ((!celebrate) && (!waitingToCelebrate) && (!fastMode)) {
             pin1FadeCycleCompletionCount++;
           }
 
-          if (pin1FadeCycleCompletionCount == fastModeCycleCountTrigger) {  // ON THE nth FADE
-                                                                            // Give everyone coffee!!!!!!!!!!!!!!!!!!!!!!!
+          if (pin1FadeCycleCompletionCount == fastModeCycleCountTrigger) {
+            // ON THE nth FADE
+            // Give everyone coffee!!!!!!!!!!!!!!!!!!!!!!!
             fadeTrueDynamic = FADETRUEFAST;
             fadeFalseDynamic = FADEFALSEFAST;
             fadeMinDynamic = FADEMINFAST;
