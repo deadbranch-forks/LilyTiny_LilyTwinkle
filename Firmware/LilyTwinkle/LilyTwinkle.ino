@@ -130,7 +130,7 @@ void setup() {
   pinMode(LED4, OUTPUT);
   startTime = micros();
 
-  // OLED stuff
+// OLED stuff
   Wire.begin();
   Wire.setClock(400000L);
 
@@ -253,11 +253,13 @@ void loop() {
         }
         //if (celebrate) {
         if ((celebrate) && (!celebrationPeak)) {
+
           // The celebration fade is over. That was fun.
           // Time to go home.
           celebrate = false;
           celebrationRoll = 500;  // Next celebration in 500 cycles
-        } else if ((celebrate) && (celebrationPeak)) {
+        } 
+        else if ((celebrate) && (celebrationPeak)) {
           celebrationPeakCount++;
           // We're in the pulse phase. Do something cool.
           if ((celebrationPeakDirection == 0) && (fadeMinDynamic > 10) && (!celebrationPeakDirectionMax)) {
@@ -280,7 +282,8 @@ void loop() {
             fadeMaxDynamic = fadeMinDynamic + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
             fadeMinDynamic0 = fadeMinDynamic0 + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
             fadeMaxDynamic0 = fadeMaxDynamic0 + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
-          } else if ((celebrationPeakDirection == 1)) {
+          } 
+          else if ((celebrationPeakDirection == 1)) {
             // Increment
             fadeMinDynamic++;  // Every cycle has the same fade rate
             fadeMaxDynamic++;
@@ -307,19 +310,17 @@ void loop() {
     else if (onCounter[1] > onTime[1]) digitalWrite(LED1, LOW);
     else digitalWrite(LED1, HIGH);
 
-    onCounter[1]++;
+onCounter[1]++;
     fadeCounter[1]++;
-
     if (fadeCounter[1] == fadeTimer[1]) {
       fadeCounter[1] = 0;
       onTime[1] += dir[1];
 
       if ((onTime[1] == limit[1]) || (onTime[1] == 0)) dir[1] *= -1;
 
-      if ((onTime[1] == 0) && (dir[1] = 1)) {
+        if ((onTime[1] == 0) && (dir[1] = 1)) {
         limit[1] = random(limitMinDynamic1, limitMaxDynamic1);  // pin-specific brightness values
         fadeTimer[1] = random(fadeMinDynamic, fadeMaxDynamic);
-
 
         if (waitingToCelebrate) {
           enable[1] = false;
@@ -350,6 +351,7 @@ void loop() {
                                                                     // in the middle of a really long fade. Replace it with something short. That way it
                                                                     // will coffee too!!!!
             byte i;
+
             for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
               enable[i] = true;                   // Turn each on.
             }
@@ -417,7 +419,6 @@ void loop() {
       onTime[3] += dir[3];
 
       if ((onTime[3] == limit[3]) || (onTime[3] == 0)) dir[3] *= -1;
-
       if ((onTime[3] == 0) && (dir[3] = 1)) {
         limit[3] = random(limitMinDynamic, limitMaxDynamic);
         fadeTimer[3] = random(fadeMinDynamic, fadeMaxDynamic);
@@ -436,16 +437,13 @@ void loop() {
     if (!enable[4]) digitalWrite(LED4, LOW);
     else if (onCounter[4] > onTime[4]) digitalWrite(LED4, LOW);
     else digitalWrite(LED4, HIGH);
-
     onCounter[4]++;
     fadeCounter[4]++;
-
     if (fadeCounter[4] == fadeTimer[4]) {
       fadeCounter[4] = 0;
       onTime[4] += dir[4];
 
       if ((onTime[4] == limit[4]) || (onTime[4] == 0)) dir[4] *= -1;
-
       if ((onTime[4] == 0) && (dir[4] = 1)) {
         limit[4] = random(limitMinDynamic, limitMaxDynamic);
         fadeTimer[4] = random(fadeMinDynamic, fadeMaxDynamic);
