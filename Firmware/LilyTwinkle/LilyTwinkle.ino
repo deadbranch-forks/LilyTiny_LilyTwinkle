@@ -96,6 +96,10 @@ int celebrationPeakCount = 0;
 boolean celebrationPeakDirectionMax = false;
 
 const int numberOfLEDs = 5;                            // Number of LED GPIO pins
+// Constant replacement arrays
+int dynamicFadeMin[numberOfLEDs] = { FADEMIN, FADEMIN, FADEMIN, FADEMIN, FADEMIN };
+int dynamicFadeMax[numberOfLEDs] = { FADEMAX, FADEMAX, FADEMAX, FADEMAX, FADEMAX };       // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+// General-operation-variable arrays
 int fadeTimer[numberOfLEDs] = { 10, 10, 10, 10, 10 };  // Value of variable for each LED n
 byte onTime[numberOfLEDs] = { 0, 0, 0, 0, 0 };
 byte onCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
