@@ -104,7 +104,7 @@ void setup() {
   pinMode(LED3, OUTPUT);
   pinMode(LED4, OUTPUT);
   startTime = micros();
-
+}
 
 void loop() {
   long currTime = micros();
