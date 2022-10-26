@@ -12,11 +12,16 @@
 // #define LED3 3
 // #define LED4 4
 // ATtiny84 pin definitions
-#define LED0 0
-#define LED1 1
-#define LED2 2
-#define LED3 3
-#define LED4 7
+// #define LED0 0
+// #define LED1 1
+// #define LED2 2
+// #define LED3 3
+// #define LED4 7
+#define LED0 9    // not gate red
+#define LED1 10   // not gate blue
+#define LED2 PA2
+#define LED3 PA1
+#define LED4 PA0
 
 #define FADEMIN 50
 #define FADEMAX 55
