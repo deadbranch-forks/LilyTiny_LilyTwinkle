@@ -88,8 +88,8 @@ const int numberOfLEDs = 5;  // Number of LED GPIO pins
 // Constant replacement arrays
 int dynamicFadeMin[numberOfLEDs] = { FADEMIN, FADEMIN, FADEMIN, FADEMIN, FADEMIN };
 int dynamicFadeMax[numberOfLEDs] = { FADEMAX, FADEMAX, FADEMAX, FADEMAX, FADEMAX };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
-int dynamicFadeTrue[numberOfLEDs] = { FADETRUE0, FADETRUE, FADETRUE, FADETRUE, FADETRUE } // Values determining success probability of roll to enable LED next round.
-int dynamicFadeFalse[numberOfLEDs] = { FADEFALSE0, FADEFALSE, FADEFALSE, FADEFALSE }
+int dynamicFadeTrue[numberOfLEDs] = { FADETRUE0, FADETRUE, FADETRUE, FADETRUE, FADETRUE }; // Values determining success probability of roll to enable LED next round.
+int dynamicFadeFalse[numberOfLEDs] = { FADEFALSE0, FADEFALSE, FADEFALSE, FADEFALSE, FADEFALSE };
 
 // General-operation-variable arrays
 int fadeTimer[numberOfLEDs] = { 10, 10, 10, 10, 10 };  // Value of variable for each LED n
@@ -710,5 +710,5 @@ void loop() {
 void chooseState(int pin){
   if (waitingToCelebrate) enable[pin] = false;  // Stay disabled
   if (fastMode) enable[pin] = true;             // Enable next round
-  return enable[pin] = random(0, fadeTrueDynamic + 1) >= fadeFalseDynamic; // Roll for next state
+  return enable[pin] = random(0, dynamicFadeTrue[pin] + 1) >= dynamicFadeFalse[pin]; // Roll for next state
 }
