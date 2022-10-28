@@ -710,5 +710,5 @@ void loop() {
 void chooseState(int pin){
   if (waitingToCelebrate) enable[pin] = false;  // Stay disabled
   if (fastMode) enable[pin] = true;             // Enable next round
-  enable[pin] = random(0, fadeTrueDynamic + 1) >= fadeFalseDynamic; // Roll for next state
+  return enable[pin] = random(0, fadeTrueDynamic + 1) >= fadeFalseDynamic; // Roll for next state
 }
