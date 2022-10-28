@@ -319,18 +319,24 @@ void loop() {
 void giveEveryoneCoffee() {
   // ON THE nth FADE
   // Give everyone coffee!!!!!!!!!!!!!!!!!!!!!!!
-  fadeTrueDynamic = FADETRUEFAST;
-  fadeFalseDynamic = FADEFALSEFAST;
+
+  byte i;
+  for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+    dynamicFadeTrue[i] = FADETRUEFAST;  // Set a high enable roll probability.
+    dynamicFadeFalse[i] = FADEFALSEFAST; 
+  }
+  //fadeTrueDynamic = FADETRUEFAST;
+  //fadeFalseDynamic = FADEFALSEFAST;
   fadeMinDynamic = FADEMINFAST;
   fadeMaxDynamic = FADEMAXFAST;
   fadeMinDynamic0 = FADEMINFAST;  // pin-specific dynamic fade speed variable
   fadeMaxDynamic0 = FADEMAXFAST;
-  fadeFalseDynamic0 = FADEFALSEFAST;  // pin-specific dynamic dice roll
-  fadeTrueDynamic0 = FADETRUEFAST;
+  //fadeFalseDynamic0 = FADEFALSEFAST;  // pin-specific dynamic dice roll
+  //fadeTrueDynamic0 = FADETRUEFAST;
   fadeTimer[0] = random(fadeMinDynamic, fadeMaxDynamic);  // Hijack LED0's fade timer just in case it's
                                                           // in the middle of a really long fade. Replace it with something short. That way it
                                                           // will coffee too!!!!
-  byte i;
+
   for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
     enable[i] = true;                   // Turn each on.
   }
@@ -347,8 +353,11 @@ void endFastMode() {
   // int dynamicFadeFalse[numberOfLEDs] = { FADEFALSE0, FADEFALSE, FADEFALSE, FADEFALSE, FADEFALSE };
 
 
-  fadeTrueDynamic = FADETRUE;
-  fadeFalseDynamic = FADEFALSE;
+  // Restore dynamicFadeTrue values from defaultDynamicFadeTrue array.
+  memcpy(dynamicFadeTrue, defaultDynamicFadeTrue, sizeof defaultDynamicFadeTrue);
+  memcpy(dynamicFadeFalse, defaultDynamicFadeFalse, sizeof defaultDynamicFadeFalse);
+  //fadeTrueDynamic = FADETRUE;
+  //fadeFalseDynamic = FADEFALSE;
   fadeMinDynamic = FADEMIN;
   fadeMaxDynamic = FADEMAX;
   fadeMinDynamic0 = FADEMIN0;  // pin-specific dynamic fade speed variable
