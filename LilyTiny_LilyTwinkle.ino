@@ -343,8 +343,6 @@ void endFastMode() {
   // Restore dynamicFadeTrue values from defaultDynamicFadeTrue array.
   memcpy(dynamicFadeTrue, defaultDynamicFadeTrue, sizeof defaultDynamicFadeTrue);
   memcpy(dynamicFadeFalse, defaultDynamicFadeFalse, sizeof defaultDynamicFadeFalse);
-  //fadeTrueDynamic = FADETRUE;
-  //fadeFalseDynamic = FADEFALSE;
   fadeMinDynamic = FADEMIN;
   fadeMaxDynamic = FADEMAX;
   fadeMinDynamic0 = FADEMIN0;  // pin-specific dynamic fade speed variable
