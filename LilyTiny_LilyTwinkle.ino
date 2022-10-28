@@ -17,8 +17,8 @@
 // #define LED2 2
 // #define LED3 3
 // #define LED4 7
-#define LED0 9    // not gate red
-#define LED1 10   // not gate blue
+#define LED0 9   // not gate red
+#define LED1 10  // not gate blue
 #define LED2 PA2
 #define LED3 PA1
 #define LED4 PA0
@@ -87,8 +87,8 @@ boolean celebrationPeakDirectionMax = false;
 const int numberOfLEDs = 5;  // Number of LED GPIO pins
 // Constant replacement arrays
 int dynamicFadeMin[numberOfLEDs] = { FADEMIN, FADEMIN, FADEMIN, FADEMIN, FADEMIN };
-int dynamicFadeMax[numberOfLEDs] = { FADEMAX, FADEMAX, FADEMAX, FADEMAX, FADEMAX };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
-int dynamicFadeTrue[numberOfLEDs] = { FADETRUE0, FADETRUE, FADETRUE, FADETRUE, FADETRUE }; // Values determining success probability of roll to enable LED next round.
+int dynamicFadeMax[numberOfLEDs] = { FADEMAX, FADEMAX, FADEMAX, FADEMAX, FADEMAX };         // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+int dynamicFadeTrue[numberOfLEDs] = { FADETRUE0, FADETRUE, FADETRUE, FADETRUE, FADETRUE };  // Values determining success probability of roll to enable LED next round.
 int dynamicFadeFalse[numberOfLEDs] = { FADEFALSE0, FADEFALSE, FADEFALSE, FADEFALSE, FADEFALSE };
 
 // General-operation-variable arrays
@@ -424,7 +424,7 @@ void loop() {
   if ((currTime - startTime) < delayTime)
     return;
 
-  startTime = currTime;   // Start the timer over. 
+  startTime = currTime;  // Start the timer over.
 
   // Check to see if we're waiting to celebrate, and if everyone has arrived.
   if ((waitingToCelebrate) && (!enable[0]) && (!enable[1]) && (!enable[2]) && (!enable[3]) && (!enable[4])) {
@@ -552,16 +552,7 @@ void loop() {
         }
       }
 
-      if (waitingToCelebrate) {
-        enable[0] = false;
-      } else if (fastMode) {
-        enable[0] = true;
-      } else {
-        // As long as we're not waiting to celebrate,
-        // and it's not fast mode,
-        // then roll another die.
-        enable[0] = random(0, fadeTrueDynamic0 + 1) >= fadeFalseDynamic0;
-      }
+      decideLEDState(0);
     }
   }
 
@@ -582,13 +573,7 @@ void loop() {
       limit[1] = random(limitMinDynamic1, limitMaxDynamic1);  // pin-specific brightness values
       fadeTimer[1] = random(fadeMinDynamic, fadeMaxDynamic);
 
-      if (waitingToCelebrate) {
-        enable[1] = false;
-      } else if (fastMode) {
-        enable[1] = true;
-      } else {
-        enable[1] = random(0, fadeTrueDynamic + 1) >= fadeFalseDynamic;
-      }
+      decideLEDState(1);
 
       // fade-cycle completions counter.
       // Only triggers at the end of a full fade cycle when the LED was on.
@@ -659,8 +644,7 @@ void loop() {
     if ((onTime[2] == 0) && (dir[2] = 1)) {
       limit[2] = random(limitMinDynamic, limitMaxDynamic);
       fadeTimer[2] = random(fadeMinDynamic, fadeMaxDynamic);
-
-      chooseState(2);
+      decideLEDState(2);
     }
   }
 
@@ -680,8 +664,7 @@ void loop() {
     if ((onTime[3] == 0) && (dir[3] = 1)) {
       limit[3] = random(limitMinDynamic, limitMaxDynamic);
       fadeTimer[3] = random(fadeMinDynamic, fadeMaxDynamic);
-
-      chooseState(3);
+      decideLEDState(3);
     }
   }
 
@@ -691,24 +674,41 @@ void loop() {
   else digitalWrite(LED4, HIGH);
   onCounter[4]++;
   fadeCounter[4]++;
-  if (fadeCounter[4] == fadeTimer[4]) {
-    fadeCounter[4] = 0;
-    onTime[4] += dir[4];
 
-    if ((onTime[4] == limit[4]) || (onTime[4] == 0)) dir[4] *= -1;
-
-    if ((onTime[4] == 0) && (dir[4] = 1)) {
-      limit[4] = random(limitMinDynamic, limitMaxDynamic);
-      fadeTimer[4] = random(fadeMinDynamic, fadeMaxDynamic);
-
-      chooseState(4);
-    }
-  }
-
+  compareFadeTimerWithCounter(4);
 }
 
-void chooseState(int pin){
-  if (waitingToCelebrate) enable[pin] = false;  // Stay disabled
-  if (fastMode) enable[pin] = true;             // Enable next round
-  return enable[pin] = random(0, dynamicFadeTrue[pin] + 1) >= dynamicFadeFalse[pin]; // Roll for next state
+void compareFadeTimerWithCounter(int pin) {
+  if (fadeCounter[pin] != fadeTimer[pin]) {
+    return;
+  }
+
+  fadeCounter[pin] = 0;
+  onTime[pin] += dir[pin];
+
+  if ((onTime[4] == limit[4]) || (onTime[4] == 0)) dir[4] *= -1;  // change fade direction
+  if ((onTime[4] == 0) && (dir[4] = 1)) { // Timer has run out and fade direction had reached 0 (and reversed)
+    limit[4] = random(limitMinDynamic, limitMaxDynamic);
+    fadeTimer[4] = random(fadeMinDynamic, fadeMaxDynamic);
+    decideLEDState(4);
+  }
+}
+
+void decideLEDState(int pin) {
+  // Decide if an LED should be enabled next round.
+
+  if (waitingToCelebrate) {
+    enable[pin] = false;  // Stay disabled
+    return;
+  }
+  if (fastMode) {
+    enable[pin] = true;  // Enable next round
+    return;
+  }
+
+  // As long as we're not waiting to celebrate,
+  // and it's not fast mode,
+  // then roll another die.
+  enable[pin] = random(0, dynamicFadeTrue[pin] + 1) >= dynamicFadeFalse[pin];
+  return;
 }
