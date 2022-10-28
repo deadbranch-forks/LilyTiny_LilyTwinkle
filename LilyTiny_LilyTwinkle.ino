@@ -108,6 +108,8 @@ boolean enable[numberOfLEDs] = { true, true, true, true, true };
 long delayTime = 50;
 long startTime = 0;
 
+byte i;
+
 void setup() {
   randomSeed(analogRead(3));
   pinMode(LED0, OUTPUT);
@@ -320,19 +322,15 @@ void giveEveryoneCoffee() {
   // ON THE nth FADE
   // Give everyone coffee!!!!!!!!!!!!!!!!!!!!!!!
 
-  byte i;
   for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
     dynamicFadeTrue[i] = FADETRUEFAST;  // Set a high enable roll probability.
     dynamicFadeFalse[i] = FADEFALSEFAST; 
   }
-  //fadeTrueDynamic = FADETRUEFAST;
-  //fadeFalseDynamic = FADEFALSEFAST;
+
   fadeMinDynamic = FADEMINFAST;
   fadeMaxDynamic = FADEMAXFAST;
   fadeMinDynamic0 = FADEMINFAST;  // pin-specific dynamic fade speed variable
   fadeMaxDynamic0 = FADEMAXFAST;
-  //fadeFalseDynamic0 = FADEFALSEFAST;  // pin-specific dynamic dice roll
-  //fadeTrueDynamic0 = FADETRUEFAST;
   fadeTimer[0] = random(fadeMinDynamic, fadeMaxDynamic);  // Hijack LED0's fade timer just in case it's
                                                           // in the middle of a really long fade. Replace it with something short. That way it
                                                           // will coffee too!!!!
@@ -344,14 +342,6 @@ void giveEveryoneCoffee() {
 }
 
 void endFastMode() {
-  //   dynamicFadeTrue[pin] = { FADETRUE0, FADETRUE, FADETRUE, FADETRUE, FADETRUE }
-  //   dynamicFadeFalse[pin] = { }
-
-  // int dynamicFadeMin[numberOfLEDs] = { FADEMIN, FADEMIN, FADEMIN, FADEMIN, FADEMIN };
-  // int dynamicFadeMax[numberOfLEDs] = { FADEMAX, FADEMAX, FADEMAX, FADEMAX, FADEMAX };         // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
-  // int dynamicFadeTrue[numberOfLEDs] = { FADETRUE0, FADETRUE, FADETRUE, FADETRUE, FADETRUE };  // Values determining success probability of roll to enable LED next round.
-  // int dynamicFadeFalse[numberOfLEDs] = { FADEFALSE0, FADEFALSE, FADEFALSE, FADEFALSE, FADEFALSE };
-
 
   // Restore dynamicFadeTrue values from defaultDynamicFadeTrue array.
   memcpy(dynamicFadeTrue, defaultDynamicFadeTrue, sizeof defaultDynamicFadeTrue);
