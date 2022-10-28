@@ -52,14 +52,10 @@
 
 // Fast mode variables. Initialize frequency and duration dynamic variables from constants.
 // Will be changed to faster values upon a trigger.
-int fadeFalseDynamic = FADEFALSE;
-int fadeTrueDynamic = FADETRUE;
 int fadeMinDynamic = FADEMIN;
 int fadeMaxDynamic = FADEMAX;
 int fadeMinDynamic0 = FADEMIN;       // LED0 has a different default fade speed range (slower, longer) than the rest.
 int fadeMaxDynamic0 = FADEMAX;       // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
-int fadeFalseDynamic0 = FADEFALSE0;  // LED0 has a higher probability of rolling enable.
-int fadeTrueDynamic0 = FADETRUE0;
 int limitMinDynamic = LIMITMIN;
 int limitMaxDynamic = LIMITMAX;
 int limitMinDynamic0 = LIMITMIN0;
@@ -176,10 +172,10 @@ void loop() {
       limitMaxDynamic0 = 230;
       limitMinDynamic1 = 230;
       limitMaxDynamic1 = 230;
-      fadeFalseDynamic = 1;  // Every roll wins
-      fadeTrueDynamic = 1000;
-      fadeFalseDynamic0 = 1;
-      fadeTrueDynamic0 = 1000;
+      for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+        dynamicFadeTrue[i] = 1000;  // Set a high enable roll probability.
+        dynamicFadeFalse[i] = 1; 
+      }
       fadeMinDynamic = 50;  // Every cycle has the same fade rate
       fadeMaxDynamic = 50;
       fadeMinDynamic0 = 50;
@@ -207,8 +203,9 @@ void loop() {
         celebrationPeakCount = 0;
         celebrationPeakDirection = 0;
         celebrationPeakDirectionMax = false;
-        fadeTrueDynamic = FADETRUE;
-        fadeFalseDynamic = FADEFALSE;
+        // Restore dynamicFadeTrue values from defaultDynamicFadeTrue array.
+        memcpy(dynamicFadeTrue, defaultDynamicFadeTrue, sizeof defaultDynamicFadeTrue);
+        memcpy(dynamicFadeFalse, defaultDynamicFadeFalse, sizeof defaultDynamicFadeFalse);
         fadeMinDynamic = FADEMIN;
         fadeMaxDynamic = FADEMAX;
         fadeMinDynamic0 = FADEMIN0;  // pin-specific dynamic fade speed variable
