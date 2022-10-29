@@ -374,8 +374,8 @@ void compareFadeTimerWithCounter(int pin) {
 
   if ((onTime[pin] == limit[pin]) || (onTime[pin] == 0)) dir[pin] *= -1;  // change fade direction
   if ((onTime[pin] == 0) && (dir[pin] = 1)) {                             // Timer has run out and fade direction had reached 0 (and reversed)
-    limit[pin] = random(limitMinDynamic, limitMaxDynamic);
-    fadeTimer[pin] = random(fadeMinDynamic, fadeMaxDynamic);
+    limit[pin] = random(dynamicLimitMin[pin], dynamicLimitMax[pin]);
+    fadeTimer[pin] = random(dynamicFadeMin[pin], dynamicFadeMax[pin]);
     decideLEDState(pin);
   }
 }
