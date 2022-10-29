@@ -176,30 +176,18 @@ void loop() {
       celebrationPeak = true;  // Set "peak-phase" flag.
 
       // Do something different.
-      limitMinDynamic = 230;  // The minimum brightness the LED can get is equal
-                              // to the max. This a pulsing effect
-      limitMaxDynamic = 230;
-      limitMinDynamic0 = 230;
-      limitMaxDynamic0 = 230;
-      limitMinDynamic1 = 230;
-      limitMaxDynamic1 = 230;
       for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-        dynamicFadeTrue[i] = 1000;  // Set a high enable roll probability.
+        dynamicFadeTrue[i] = 1000; // Set a high enable roll probability.
         dynamicFadeFalse[i] = 1;
-        limitMinDynamic = 230;  // The minimum brightness the LED can get is equal
-                              // to the max. This a pulsing effect
-        limitMaxDynamic = 230;
+        dynamicFadeMin[i] = 50;
+        dynamicFadeMax[i] = 50;
+        dynamicLimitMin[i] = 230; // The minimum brightness the LED can get is equal
+        dynamicLimitMax[i] = 230; // to the max. This a pulsing effect
       }
-      fadeMinDynamic = 50;  // Every cycle has the same fade rate
-      fadeMaxDynamic = 50;
-      fadeMinDynamic0 = 50;
-      fadeMaxDynamic0 = 50;
 
       // Choose a direction for the pulse
       celebrationPeakDirection = random(0, 1);
 
-      //   delay(5000); // Hold
-      //   celebrationPeak = false;
     }
     //else if ((celebrationPeak) && ((onTime[0]/limit[0]) > 0.75)) {
     //}
