@@ -322,7 +322,6 @@ void giveEveryoneCoffee() {
   fadeTimer[0] = random(FADEMINFAST, FADEMAXFAST);  // Hijack LED0's fade timer just in case it's
                                                     // in the middle of a really long fade. Replace it with something short. That way it
                                                     // will coffee too!!!!
-
   for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
     enable[i] = true;                   // Turn each on.
   }
@@ -330,7 +329,6 @@ void giveEveryoneCoffee() {
 }
 
 void endFastMode() {
-
   // Restore dynamicFadeTrue values from defaultDynamicFadeTrue array.
   memcpy(dynamicFadeTrue, defaultDynamicFadeTrue, sizeof defaultDynamicFadeTrue);
   memcpy(dynamicFadeFalse, defaultDynamicFadeFalse, sizeof defaultDynamicFadeFalse);
@@ -345,20 +343,11 @@ void endOfFadeCycleThings(int pin) {
   if (!enable[1]) {
     return;
   }
-
-  if (pin1FadeCycleCompletionCount == fastModeCycleCountTrigger) {
-    giveEveryoneCoffee();
-  }
-  if (pin1FadeCycleCompletionCount == 11) {  // Uh oh coffee has worn off eveyrone is sleepy.
-    endFastMode();
-  }
-
+  if (pin1FadeCycleCompletionCount == fastModeCycleCountTrigger) giveEveryoneCoffee();
+  if (pin1FadeCycleCompletionCount == 11) endFastMode();  // Uh oh coffee has worn off eveyrone is sleepy.
   // Only increment the fast mode counter if celebration-mode flags are false
   // and not already in fast mode.
-  if ((!celebrate) && (!waitingToCelebrate) && (!fastMode)) {
-    pin1FadeCycleCompletionCount++;
-  }
-
+  if ((!celebrate) && (!waitingToCelebrate) && (!fastMode)) pin1FadeCycleCompletionCount++;
   return;
 }
 
@@ -366,7 +355,6 @@ void compareFadeTimerWithCounter(int pin) {
   if (fadeCounter[pin] != fadeTimer[pin]) {
     return;
   }
-
   fadeCounter[pin] = 0;
   onTime[pin] += dir[pin];
 
@@ -380,7 +368,6 @@ void compareFadeTimerWithCounter(int pin) {
 
 void decideLEDState(int pin) {
   // Decide if an LED should be enabled next round.
-
   if (waitingToCelebrate) {
     enable[pin] = false;  // Stay disabled
     return;
