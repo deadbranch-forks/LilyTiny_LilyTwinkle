@@ -54,8 +54,8 @@
 // Will be changed to faster values upon a trigger.
 int fadeMinDynamic = FADEMIN;
 int fadeMaxDynamic = FADEMAX;
-int fadeMinDynamic0 = FADEMIN;       // LED0 has a different default fade speed range (slower, longer) than the rest.
-int fadeMaxDynamic0 = FADEMAX;       // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+int fadeMinDynamic0 = FADEMIN;  // LED0 has a different default fade speed range (slower, longer) than the rest.
+int fadeMaxDynamic0 = FADEMAX;  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
 int limitMinDynamic = LIMITMIN;
 int limitMaxDynamic = LIMITMAX;
 int limitMinDynamic0 = LIMITMIN0;
@@ -177,12 +177,12 @@ void loop() {
 
       // Do something different.
       for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-        dynamicFadeTrue[i] = 1000; // Set a high enable roll probability.
+        dynamicFadeTrue[i] = 1000;          // Set a high enable roll probability.
         dynamicFadeFalse[i] = 1;
         dynamicFadeMin[i] = 50;
         dynamicFadeMax[i] = 50;
-        dynamicLimitMin[i] = 230; // The minimum brightness the LED can get is equal
-        dynamicLimitMax[i] = 230; // to the max. This a pulsing effect
+        dynamicLimitMin[i] = 230;  // The minimum brightness the LED can get is equal
+        dynamicLimitMax[i] = 230;  // to the max. This a pulsing effect
       }
 
       // Choose a direction for the pulse
@@ -231,24 +231,22 @@ void loop() {
           }
           celebrationPeakDirectionMax == true;
         } else if ((celebrationPeakDirection == 0) && (celebrationPeakDirectionMax)) {
-          limitMinDynamic = limitMinDynamic + random(-3, 1);
-          limitMaxDynamic = limitMaxDynamic + random(-5, 3);
-          limitMinDynamic0 = limitMinDynamic0 + random(-3, 3);
-          limitMaxDynamic0 = limitMaxDynamic0 + random(-3, 2);
-          limitMinDynamic1 = limitMinDynamic1 + random(-4, 3);
-          limitMaxDynamic1 = limitMaxDynamic1 + random(-3, 3);
+          for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+            dynamicLimitMin[i] = dynamicLimitMin[i] + random(-4, 1);
+            dynamicLimitMax[i] = dynamicLimitMax[i] + random(-3, 1);
+          }
 
           srandom(2499492929);
-          fadeMinDynamic = fadeMinDynamic + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));  // Every cycle has the same fade rate
-          fadeMaxDynamic = fadeMinDynamic + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
-          fadeMinDynamic0 = fadeMinDynamic0 + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
-          fadeMaxDynamic0 = fadeMaxDynamic0 + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
+          for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+            dynamicFadeMin[i] = dynamicFadeMin[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
+            dynamicFadeMax[i] = dynamicFadeMax[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
+          }
         } else if ((celebrationPeakDirection == 1)) {
           // Increment
-          fadeMinDynamic++;  // Every cycle has the same fade rate
-          fadeMaxDynamic++;
-          fadeMinDynamic0++;
-          fadeMaxDynamic0++;
+          for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+            dynamicFadeMin[i]++;
+            dynamicFadeMax[i]++;
+          }
         }
       }
 
@@ -322,8 +320,8 @@ void giveEveryoneCoffee() {
     dynamicFadeMax[i] = FADEMAXFAST;
   }
   fadeTimer[0] = random(FADEMINFAST, FADEMAXFAST);  // Hijack LED0's fade timer just in case it's
-                                                          // in the middle of a really long fade. Replace it with something short. That way it
-                                                          // will coffee too!!!!
+                                                    // in the middle of a really long fade. Replace it with something short. That way it
+                                                    // will coffee too!!!!
 
   for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
     enable[i] = true;                   // Turn each on.
