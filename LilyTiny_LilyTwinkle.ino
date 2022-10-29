@@ -288,16 +288,17 @@ void celebrationRoutine() {
       dynamicFadeMax[i]--;
     }
     celebrationPeakDirectionMax == true;
-  } 
-
-    // We know celebrationPeakDirectionMax is true.
-    srandom(2499492929);
+  } else if (celebrationPeakDirectionMax) {
     for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
       dynamicLimitMin[i] = dynamicLimitMin[i] + random(-4, 1);
       dynamicLimitMax[i] = dynamicLimitMax[i] + random(-3, 1);
+    }
+
+    srandom(2499492929);
+    for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
       dynamicFadeMin[i] = dynamicFadeMin[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
       dynamicFadeMax[i] = dynamicFadeMax[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
-  
+    }
   }
 }
 
