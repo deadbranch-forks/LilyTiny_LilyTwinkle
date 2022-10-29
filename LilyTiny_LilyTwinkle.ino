@@ -82,13 +82,15 @@ boolean celebrationPeakDirectionMax = false;
 
 const int numberOfLEDs = 5;  // Number of LED GPIO pins
 // Constant replacement arrays
-int dynamicFadeMin[numberOfLEDs] = { FADEMIN, FADEMIN, FADEMIN, FADEMIN, FADEMIN };
-int dynamicFadeMax[numberOfLEDs] = { FADEMAX, FADEMAX, FADEMAX, FADEMAX, FADEMAX };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+int defaultDynamicFadeMin[numberOfLEDs] = { FADEMIN, FADEMIN, FADEMIN, FADEMIN, FADEMIN };
+int defaultDynamicFadeMax[numberOfLEDs] = { FADEMAX, FADEMAX, FADEMAX, FADEMAX, FADEMAX };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+int dynamicFadeMin[numberOfLEDs];
+int dynamicFadeMax[numberOfLEDs];
 
 // Keep a copy of the "default" fade probabilities and speeds.
 int defaultDynamicFadeTrue[numberOfLEDs] = { FADETRUE0, FADETRUE, FADETRUE, FADETRUE, FADETRUE };  // Values determining success probability of roll to enable LED next round.
-int dynamicFadeTrue[numberOfLEDs];  // Initialize empty array to avoid duplication. Populated using memcpy in setup();
 int defaultDynamicFadeFalse[numberOfLEDs] = { FADEFALSE0, FADEFALSE, FADEFALSE, FADEFALSE, FADEFALSE };
+int dynamicFadeTrue[numberOfLEDs];  // Initialize empty array to avoid duplication. Populated using memcpy in setup();
 int dynamicFadeFalse[numberOfLEDs];
 
 // General-operation-variable arrays
@@ -115,10 +117,11 @@ void setup() {
   pinMode(LED4, OUTPUT);
   startTime = micros();
 
-  // Populate dynamicFade arrays
+  // Populate dynamic fade arrays
   memcpy(dynamicFadeTrue, defaultDynamicFadeTrue, sizeof defaultDynamicFadeTrue);
   memcpy(dynamicFadeFalse, defaultDynamicFadeFalse, sizeof defaultDynamicFadeFalse);
-
+  memcpy(dynamicFadeMin, defaultDynamicFadeMin, sizeof defaultDynamicFadeMin);
+  memcpy(dynamicFadeMax, defaultDynamicFadeMax, sizeof defaultDynamicFadeMax);
 }
 
 void loop() {
