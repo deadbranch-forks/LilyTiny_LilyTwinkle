@@ -208,16 +208,10 @@ void loop() {
         // Restore dynamicFadeTrue values from defaultDynamicFadeTrue array.
         memcpy(dynamicFadeTrue, defaultDynamicFadeTrue, sizeof defaultDynamicFadeTrue);
         memcpy(dynamicFadeFalse, defaultDynamicFadeFalse, sizeof defaultDynamicFadeFalse);
-        fadeMinDynamic = FADEMIN;
-        fadeMaxDynamic = FADEMAX;
-        fadeMinDynamic0 = FADEMIN0;  // pin-specific dynamic fade speed variable
-        fadeMaxDynamic0 = FADEMAX0;
-        limitMinDynamic = LIMITMIN;
-        limitMaxDynamic = LIMITMAX;
-        limitMinDynamic0 = LIMITMIN0;
-        limitMaxDynamic0 = LIMITMAX0;
-        limitMinDynamic1 = LIMITMIN1;
-        limitMaxDynamic1 = LIMITMAX1;
+        memcpy(dynamicFadeMin, defaultDynamicFadeMin, sizeof defaultDynamicFadeMin);
+        memcpy(dynamicFadeMax, defaultDynamicFadeMax, sizeof defaultDynamicFadeMax);
+        memcpy(dynamicLimitMin, defaultDynamicLimitMin, sizeof defaultDynamicLimitMin);
+        memcpy(dynamicLimitMax, defaultDynamicLimitMax, sizeof defaultDynamicLimitMax);
       }
       //if (celebrate) {
       if ((celebrate) && (!celebrationPeak)) {
@@ -323,14 +317,11 @@ void giveEveryoneCoffee() {
 
   for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
     dynamicFadeTrue[i] = FADETRUEFAST;  // Set a high enable roll probability.
-    dynamicFadeFalse[i] = FADEFALSEFAST; 
+    dynamicFadeFalse[i] = FADEFALSEFAST;
+    dynamicFadeMin[i] = FADEMINFAST;
+    dynamicFadeMax[i] = FADEMAXFAST;
   }
-
-  fadeMinDynamic = FADEMINFAST;
-  fadeMaxDynamic = FADEMAXFAST;
-  fadeMinDynamic0 = FADEMINFAST;  // pin-specific dynamic fade speed variable
-  fadeMaxDynamic0 = FADEMAXFAST;
-  fadeTimer[0] = random(fadeMinDynamic, fadeMaxDynamic);  // Hijack LED0's fade timer just in case it's
+  fadeTimer[0] = random(FADEMINFAST, FADEMAXFAST);  // Hijack LED0's fade timer just in case it's
                                                           // in the middle of a really long fade. Replace it with something short. That way it
                                                           // will coffee too!!!!
 
