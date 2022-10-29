@@ -82,16 +82,22 @@ boolean celebrationPeakDirectionMax = false;
 
 const int numberOfLEDs = 5;  // Number of LED GPIO pins
 // Constant replacement arrays
+
+// Keep a copy of the "default" fade probabilities and speeds.
 int defaultDynamicFadeMin[numberOfLEDs] = { FADEMIN, FADEMIN, FADEMIN, FADEMIN, FADEMIN };
 int defaultDynamicFadeMax[numberOfLEDs] = { FADEMAX, FADEMAX, FADEMAX, FADEMAX, FADEMAX };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
 int dynamicFadeMin[numberOfLEDs];
 int dynamicFadeMax[numberOfLEDs];
 
-// Keep a copy of the "default" fade probabilities and speeds.
 int defaultDynamicFadeTrue[numberOfLEDs] = { FADETRUE0, FADETRUE, FADETRUE, FADETRUE, FADETRUE };  // Values determining success probability of roll to enable LED next round.
 int defaultDynamicFadeFalse[numberOfLEDs] = { FADEFALSE0, FADEFALSE, FADEFALSE, FADEFALSE, FADEFALSE };
 int dynamicFadeTrue[numberOfLEDs];  // Initialize empty array to avoid duplication. Populated using memcpy in setup();
 int dynamicFadeFalse[numberOfLEDs];
+
+int defaultDynamicLimitMin[numberOfLEDs] = { LIMITMIN0, LIMITMIN1, LIMITMIN, LIMITMIN, LIMITMIN };
+int defaultDynamicLimitMax[numberOfLEDs] = { LIMITMAX0, LIMITMAX1, LIMITMAX, LIMITMAX, LIMITMAX };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+int dynamicLimitMin[numberOfLEDs];
+int dynamicLimitMax[numberOfLEDs];
 
 // General-operation-variable arrays
 int fadeTimer[numberOfLEDs] = { 10, 10, 10, 10, 10 };  // Value of variable for each LED n
@@ -122,6 +128,8 @@ void setup() {
   memcpy(dynamicFadeFalse, defaultDynamicFadeFalse, sizeof defaultDynamicFadeFalse);
   memcpy(dynamicFadeMin, defaultDynamicFadeMin, sizeof defaultDynamicFadeMin);
   memcpy(dynamicFadeMax, defaultDynamicFadeMax, sizeof defaultDynamicFadeMax);
+  memcpy(dynamicLimitMin, defaultDynamicLimitMin, sizeof defaultDynamicLimitMin);
+  memcpy(dynamicLimitMax, defaultDynamicLimitMax, sizeof defaultDynamicLimitMax);
 }
 
 void loop() {
@@ -177,7 +185,10 @@ void loop() {
       limitMaxDynamic1 = 230;
       for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
         dynamicFadeTrue[i] = 1000;  // Set a high enable roll probability.
-        dynamicFadeFalse[i] = 1; 
+        dynamicFadeFalse[i] = 1;
+        limitMinDynamic = 230;  // The minimum brightness the LED can get is equal
+                              // to the max. This a pulsing effect
+        limitMaxDynamic = 230;
       }
       fadeMinDynamic = 50;  // Every cycle has the same fade rate
       fadeMaxDynamic = 50;
