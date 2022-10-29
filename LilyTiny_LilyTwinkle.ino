@@ -268,7 +268,8 @@ void celebrationRoutine() {
     celebrate = false;      // The celebration fade is over. That was fun.
     celebrationRoll = 500;  // Next celebration in 500 cycles
     return;
-  } else if (celebrationPeak) {
+  } 
+
     celebrationPeakCount++;
     // We're in the pulse phase. Do something cool.
     if ((celebrationPeakDirection == 0) && (dynamicFadeMin[0] > 10) && (!celebrationPeakDirectionMax)) {
@@ -296,8 +297,8 @@ void celebrationRoutine() {
         dynamicFadeMax[i]++;
       }
     }
-  }
 }
+
 void giveEveryoneCoffee() {
   // ON THE nth FADE
   // Give everyone coffee!!!!!!!!!!!!!!!!!!!!!!!
