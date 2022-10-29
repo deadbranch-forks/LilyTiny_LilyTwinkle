@@ -226,7 +226,7 @@ void loop() {
       decideLEDState(1);
 
       endOfFadeCycleThings(1);
-      celebrationRoll++;   // Celebration dice roll
+      celebrationRoll++;                                     // Celebration dice roll
       if (celebrationRoll == 25) waitingToCelebrate = true;  // Inform everyone it's time to gather for the celebration!
     }
   }
@@ -259,43 +259,44 @@ void loop() {
   compareFadeTimerWithCounter(4);
 }
 
-void celebrationRoutine(){
-      if ((celebrate) && (!celebrationPeak)) {
-
-        // The celebration fade is over. That was fun.
-        // Time to go home.
-        celebrate = false;
-        celebrationRoll = 500;  // Next celebration in 500 cycles
-      } else if ((celebrate) && (celebrationPeak)) {
-        celebrationPeakCount++;
-        // We're in the pulse phase. Do something cool.
-        if ((celebrationPeakDirection == 0) && (dynamicFadeMin[0] > 10) && (!celebrationPeakDirectionMax)) {
-          // Decrement each cycle
-          for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-            dynamicFadeMin[i]--;
-            dynamicFadeMax[i]--;
-          }
-          celebrationPeakDirectionMax == true;
-        } else if ((celebrationPeakDirection == 0) && (celebrationPeakDirectionMax)) {
-          for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-            dynamicLimitMin[i] = dynamicLimitMin[i] + random(-4, 1);
-            dynamicLimitMax[i] = dynamicLimitMax[i] + random(-3, 1);
-          }
-
-          srandom(2499492929);
-          for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-            dynamicFadeMin[i] = dynamicFadeMin[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
-            dynamicFadeMax[i] = dynamicFadeMax[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
-          }
-        } else if ((celebrationPeakDirection == 1)) {
-          // Increment
-          for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-            dynamicFadeMin[i]++;
-            dynamicFadeMax[i]++;
-          }
-        }
+void celebrationRoutine() {
+  if (!celebrate) {
+    return;
+  }
+  
+  if (!celebrationPeak) {
+    celebrate = false;      // The celebration fade is over. That was fun.
+    celebrationRoll = 500;  // Next celebration in 500 cycles
+    return;
+  } else if (celebrationPeak) {
+    celebrationPeakCount++;
+    // We're in the pulse phase. Do something cool.
+    if ((celebrationPeakDirection == 0) && (dynamicFadeMin[0] > 10) && (!celebrationPeakDirectionMax)) {
+      // Decrement each cycle
+      for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+        dynamicFadeMin[i]--;
+        dynamicFadeMax[i]--;
+      }
+      celebrationPeakDirectionMax == true;
+    } else if ((celebrationPeakDirection == 0) && (celebrationPeakDirectionMax)) {
+      for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+        dynamicLimitMin[i] = dynamicLimitMin[i] + random(-4, 1);
+        dynamicLimitMax[i] = dynamicLimitMax[i] + random(-3, 1);
       }
 
+      srandom(2499492929);
+      for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+        dynamicFadeMin[i] = dynamicFadeMin[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
+        dynamicFadeMax[i] = dynamicFadeMax[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
+      }
+    } else if ((celebrationPeakDirection == 1)) {
+      // Increment
+      for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+        dynamicFadeMin[i]++;
+        dynamicFadeMax[i]++;
+      }
+    }
+  }
 }
 void giveEveryoneCoffee() {
   // ON THE nth FADE
@@ -310,8 +311,8 @@ void giveEveryoneCoffee() {
   fadeTimer[0] = random(FADEMINFAST, FADEMAXFAST);  // Hijack LED0's fade timer just in case it's
                                                     // in the middle of a really long fade. Replace it with something short. That way it
                                                     // will coffee too!!!!
-  for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-    enable[i] = true;                   // Turn each on.
+  for (i = 0; i < numberOfLEDs; i++) {              // Loop through each LED
+    enable[i] = true;                               // Turn each on.
   }
   return;
 }
