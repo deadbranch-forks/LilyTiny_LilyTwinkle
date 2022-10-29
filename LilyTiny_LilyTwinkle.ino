@@ -154,10 +154,9 @@ void loop() {
     fadeEffect("slowSyncronisedFadeUp");  // Modify fade-setting values for a synchronised a long slow fade-up.
   }
 
-  if (celebrationRoll == 2) fadeEffect("sequential");
+// TODO: Sequential effect needs a proper trigger.
+//  if (celebrationRoll == 2) fadeEffect("sequential");
   if (celebrationRoll == celebrationTrigger) waitingToCelebrate = true;  // Inform everyone it's time to gather for the celebration!
-
-  // if (celebrationRoll == 25) waitingToCelebrate = true;  // Inform everyone it's time to gather for the celebration!
 
   // LED0 section
   if (!enable[0]) digitalWrite(LED0, LOW);
