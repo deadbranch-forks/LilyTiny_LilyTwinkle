@@ -270,8 +270,8 @@ void loop() {
     if ((onTime[1] == limit[1]) || (onTime[1] == 0)) dir[1] *= -1;
 
     if ((onTime[1] == 0) && (dir[1] = 1)) {
-      limit[1] = random(limitMinDynamic1, limitMaxDynamic1);  // pin-specific brightness values
-      fadeTimer[1] = random(fadeMinDynamic, fadeMaxDynamic);
+      limit[1] = random(dynamicLimitMin[1], dynamicLimitMax[1]);  // pin-specific brightness values
+      fadeTimer[1] = random(dynamicFadeMin[1], dynamicFadeMax[1]);
       decideLEDState(1);
 
       endOfFadeCycleThings(1);
