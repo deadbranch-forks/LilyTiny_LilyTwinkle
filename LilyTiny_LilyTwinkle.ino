@@ -336,10 +336,8 @@ void endFastMode() {
   // Restore dynamicFadeTrue values from defaultDynamicFadeTrue array.
   memcpy(dynamicFadeTrue, defaultDynamicFadeTrue, sizeof defaultDynamicFadeTrue);
   memcpy(dynamicFadeFalse, defaultDynamicFadeFalse, sizeof defaultDynamicFadeFalse);
-  fadeMinDynamic = FADEMIN;
-  fadeMaxDynamic = FADEMAX;
-  fadeMinDynamic0 = FADEMIN0;  // pin-specific dynamic fade speed variable
-  fadeMaxDynamic0 = FADEMAX0;
+  memcpy(dynamicFadeMin, defaultDynamicFadeMin, sizeof defaultDynamicFadeMin);
+  memcpy(dynamicFadeMax, defaultDynamicFadeMax, sizeof defaultDynamicFadeMax);
   pin1FadeCycleCompletionCount = 0;
   fastModeCycleCountTrigger = random(FASTMODECYCLETRIGGERMIN, FASTMODECYCLETRIGGERMAX);  // How many LED1 fade cycles until fast mode again?
   return;
