@@ -196,8 +196,8 @@ void loop() {
 
     // End of a fade cycle when the LED was on.
     if ((onTime[0] == 0) && (dir[0] = 1)) {
-      limit[0] = random(limitMinDynamic0, limitMaxDynamic0);    // pin-specific brightness values
-      fadeTimer[0] = random(fadeMinDynamic0, fadeMaxDynamic0);  // pin specific dynamic-fade speed variables
+      limit[0] = random(dynamicLimitMin[0], dynamicLimitMax[0]);    // pin-specific brightness values
+      fadeTimer[0] = random(dynamicFadeMin[0], dynamicFadeMax[0]);  // pin specific dynamic-fade speed variables
 
       if (celebrationPeakCount == 200) {
         celebrationPeak = false;
