@@ -271,15 +271,24 @@ void celebrationRoutine() {
   }
 
   celebrationPeakCount++;
+
+  if ((celebrationPeakDirection == 1)) {
+    for (i = 0; i < numberOfLEDs; i++) { 
+      dynamicFadeMin[i]++;
+      dynamicFadeMax[i]++;
+    }
+    return;
+  }
+
   // We're in the pulse phase. Do something cool.
-  if ((celebrationPeakDirection == 0) && (dynamicFadeMin[0] > 10) && (!celebrationPeakDirectionMax)) {
+  if ((dynamicFadeMin[0] > 10) && (!celebrationPeakDirectionMax)) {
     // Decrement each cycle
     for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
       dynamicFadeMin[i]--;
       dynamicFadeMax[i]--;
     }
     celebrationPeakDirectionMax == true;
-  } else if ((celebrationPeakDirection == 0) && (celebrationPeakDirectionMax)) {
+  } else if (celebrationPeakDirectionMax) {
     for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
       dynamicLimitMin[i] = dynamicLimitMin[i] + random(-4, 1);
       dynamicLimitMax[i] = dynamicLimitMax[i] + random(-3, 1);
@@ -289,12 +298,6 @@ void celebrationRoutine() {
     for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
       dynamicFadeMin[i] = dynamicFadeMin[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
       dynamicFadeMax[i] = dynamicFadeMax[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
-    }
-  } else if ((celebrationPeakDirection == 1)) {
-    // Increment
-    for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-      dynamicFadeMin[i]++;
-      dynamicFadeMax[i]++;
     }
   }
 }
