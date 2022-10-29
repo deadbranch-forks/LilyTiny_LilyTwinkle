@@ -122,27 +122,17 @@ void setup() {
 void loop() {
   long currTime = micros();
 
-  if ((currTime - startTime) < delayTime)
+  if ((currTime - startTime) < delayTime) {
     return;
+  }
 
   startTime = currTime;  // Start the timer over.
 
   // Check to see if we're waiting to celebrate, and if everyone has arrived.
   if ((waitingToCelebrate) && (!enable[0]) && (!enable[1]) && (!enable[2]) && (!enable[3]) && (!enable[4])) {
-    waitingToCelebrate = false;  // We're not waiting anymore!!
-    celebrate = true;            // Start celebrating
-
-    // Every LED has enable[n] == false. Modify fade-setting values for
-    // synchronised a long slow fade-up.
-    byte i;
-    for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-      fadeTimer[i] = 500;                 // Set very slow fade rate
-      onTime[i] = 0;                      // reset pwm counter.
-      fadeCounter[i] = 0;                 // Reset fade-position counter
-      dir[i] = 1;                         // Direction now = forward
-      limit[i] = 255;
-      enable[i] = true;
-    }
+    waitingToCelebrate = false;           // We're not waiting anymore!!
+    celebrate = true;                     // Start celebrating
+    fadeEffect("slowSyncronisedFadeUp");  // Modify fade-setting values for a synchronised a long slow fade-up.
   }
 
   // LED0 section
@@ -161,23 +151,12 @@ void loop() {
     // Ensure we're celebrating, then do something different.
     if ((celebrate) && (!celebrationPeak) && (onTime[0] == limit[0])) {
       celebrationPeak = true;  // Set "peak-phase" flag.
-
-      // Do something different.
-      for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-        dynamicFadeTrue[i] = 1000;          // Set a high enable roll probability.
-        dynamicFadeFalse[i] = 1;
-        dynamicFadeMin[i] = 50;
-        dynamicFadeMax[i] = 50;
-        dynamicLimitMin[i] = 230;  // The minimum brightness the LED can get is equal
-        dynamicLimitMax[i] = 230;  // to the max. This a pulsing effect
-      }
-
+      fadeEffect("pulsing");
       // Choose a direction for the pulse
-      celebrationPeakDirection = random(0, 1);
-
+      //celebrationPeakDirection = random(0, 1);
+      celebrationPeakDirection = 0;
     }
-    //else if ((celebrationPeak) && ((onTime[0]/limit[0]) > 0.75)) {
-    //}
+
     else if ((onTime[0] == limit[0]) || (onTime[0] == 0))
       dir[0] *= -1;
 
@@ -259,6 +238,59 @@ void loop() {
   compareFadeTimerWithCounter(4);
 }
 
+
+void compareFadeTimerWithCounter(int pin) {
+  if (fadeCounter[pin] != fadeTimer[pin]) {
+    return;
+  }
+  fadeCounter[pin] = 0;  // Reset counter
+  onTime[pin] += dir[pin];
+
+  if ((onTime[pin] == limit[pin]) || (onTime[pin] == 0)) dir[pin] *= -1;  // change fade direction
+  if ((onTime[pin] == 0) && (dir[pin] = 1)) {                             // Timer has run out and fade direction had reached 0 (and reversed)
+    limit[pin] = random(dynamicLimitMin[pin], dynamicLimitMax[pin]);
+    fadeTimer[pin] = random(dynamicFadeMin[pin], dynamicFadeMax[pin]);
+    decideLEDState(pin);
+  }
+}
+
+void decideLEDState(int pin) {
+  // Decide if an LED should be enabled next round.
+  if (waitingToCelebrate) {
+    enable[pin] = false;  // Stay disabled
+    return;
+  }
+  if (fastMode) {
+    enable[pin] = true;  // Enable next round
+    return;
+  }
+  enable[pin] = random(0, dynamicFadeTrue[pin] + 1) >= dynamicFadeFalse[pin];  // Roll for LED on|off state
+  return;
+}
+
+void fadeEffect(char effect[]) {
+  if (effect == "slowSyncronisedFadeUp") {
+    for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+      fadeTimer[i] = 500;                 // Set very slow fade rate
+      onTime[i] = 0;                      // reset pwm counter.
+      fadeCounter[i] = 0;                 // Reset fade-position counter
+      dir[i] = 1;                         // Direction now = forward
+      limit[i] = 255;
+      enable[i] = true;
+    }
+  }
+  if (effect == "pulsing") {
+    for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+      dynamicFadeTrue[i] = 1000;          // Set a high enable roll probability.
+      dynamicFadeFalse[i] = 1;
+      dynamicFadeMin[i] = 50;
+      dynamicFadeMax[i] = 50;
+      dynamicLimitMin[i] = 230;  // The minimum brightness the LED can get is equal
+      dynamicLimitMax[i] = 230;  // to the max. This a pulsing effect
+    }
+  }
+}
+
 void celebrationRoutine() {
   if (!celebrate) {
     return;
@@ -270,10 +302,10 @@ void celebrationRoutine() {
     return;
   }
 
-  celebrationPeakCount++;
+  celebrationPeakCount++;  // Only stay in the celebration peak phase for a limited amount of time.
 
   if ((celebrationPeakDirection == 1)) {
-    for (i = 0; i < numberOfLEDs; i++) { 
+    for (i = 0; i < numberOfLEDs; i++) {
       dynamicFadeMin[i]++;
       dynamicFadeMax[i]++;
     }
@@ -288,17 +320,15 @@ void celebrationRoutine() {
       dynamicFadeMax[i]--;
     }
     celebrationPeakDirectionMax == true;
-  } else if (celebrationPeakDirectionMax) {
-    for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-      dynamicLimitMin[i] = dynamicLimitMin[i] + random(-4, 1);
-      dynamicLimitMax[i] = dynamicLimitMax[i] + random(-3, 1);
-    }
+    return;
+  }
 
+  for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
     srandom(2499492929);
-    for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-      dynamicFadeMin[i] = dynamicFadeMin[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
-      dynamicFadeMax[i] = dynamicFadeMax[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
-    }
+    dynamicLimitMin[i] = dynamicLimitMin[i] + random(-4, 1);
+    dynamicLimitMax[i] = dynamicLimitMax[i] + random(-3, 1);
+    dynamicFadeMin[i] = dynamicFadeMin[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
+    dynamicFadeMax[i] = dynamicFadeMax[i] + random((celebrationPeakCount / 2), (celebrationPeakCount * 2));
   }
 }
 
@@ -333,46 +363,12 @@ void endFastMode() {
 }
 
 void endOfFadeCycleThings(int pin) {
-  if (!enable[1]) {
+  if (!enable[1]) {  // Only work on a fade-cycle phase where LED1 was enabled.
     return;
   }
   if (pin1FadeCycleCompletionCount == fastModeCycleCountTrigger) giveEveryoneCoffee();
-  if (pin1FadeCycleCompletionCount == 11) endFastMode();  // Uh oh coffee has worn off eveyrone is sleepy.
-  // Only increment the fast mode counter if celebration-mode flags are false
-  // and not already in fast mode.
-  if ((!celebrate) && (!waitingToCelebrate) && (!fastMode)) pin1FadeCycleCompletionCount++;
-  return;
-}
-
-void compareFadeTimerWithCounter(int pin) {
-  if (fadeCounter[pin] != fadeTimer[pin]) {
-    return;
-  }
-  fadeCounter[pin] = 0;
-  onTime[pin] += dir[pin];
-
-  if ((onTime[pin] == limit[pin]) || (onTime[pin] == 0)) dir[pin] *= -1;  // change fade direction
-  if ((onTime[pin] == 0) && (dir[pin] = 1)) {                             // Timer has run out and fade direction had reached 0 (and reversed)
-    limit[pin] = random(dynamicLimitMin[pin], dynamicLimitMax[pin]);
-    fadeTimer[pin] = random(dynamicFadeMin[pin], dynamicFadeMax[pin]);
-    decideLEDState(pin);
-  }
-}
-
-void decideLEDState(int pin) {
-  // Decide if an LED should be enabled next round.
-  if (waitingToCelebrate) {
-    enable[pin] = false;  // Stay disabled
-    return;
-  }
-  if (fastMode) {
-    enable[pin] = true;  // Enable next round
-    return;
-  }
-
-  // As long as we're not waiting to celebrate,
-  // and it's not fast mode,
-  // then roll another die.
-  enable[pin] = random(0, dynamicFadeTrue[pin] + 1) >= dynamicFadeFalse[pin];
+  if (pin1FadeCycleCompletionCount == 11) endFastMode();                                     // Uh oh coffee has worn off eveyrone is sleepy.
+  if ((!celebrate) && (!waitingToCelebrate) && (!fastMode)) pin1FadeCycleCompletionCount++;  // Only increment the fast mode
+                                                                                             // counter if celebration-mode flags are false and not already in fast mode.
   return;
 }
