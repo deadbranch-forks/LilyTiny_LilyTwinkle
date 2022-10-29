@@ -225,10 +225,10 @@ void loop() {
         // We're in the pulse phase. Do something cool.
         if ((celebrationPeakDirection == 0) && (fadeMinDynamic > 10) && (!celebrationPeakDirectionMax)) {
           // Decrement each cycle
-          fadeMinDynamic--;  // Every cycle has the same fade rate
-          fadeMaxDynamic--;
-          fadeMinDynamic0--;
-          fadeMaxDynamic0--;
+          for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
+            dynamicFadeMin[i]--;
+            dynamicFadeMax[i]--;
+          }
           celebrationPeakDirectionMax == true;
         } else if ((celebrationPeakDirection == 0) && (celebrationPeakDirectionMax)) {
           limitMinDynamic = limitMinDynamic + random(-3, 1);
