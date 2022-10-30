@@ -59,8 +59,8 @@ const int numberOfLEDs = 5;  // Number of LED GPIO pins
 // Constant replacement arrays
 
 // Keep a copy of the "default" fade probabilities and speeds.
-const int dynamicFadeMinDEFAULT[numberOfLEDs] = { 70, 50, 40, 5, 50 };
-const int dynamicFadeMaxDEFAULT[numberOfLEDs] = { 200, 255, 55, 15, 55 };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+const int dynamicFadeMinDEFAULT[numberOfLEDs] = { 70, 50, 40, 30, 50 };
+const int dynamicFadeMaxDEFAULT[numberOfLEDs] = { 200, 255, 55, 40, 55 };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
 int dynamicFadeMin[numberOfLEDs];                                          // Initialize empty array to avoid duplication. Populated using memcpy in setup();
 int dynamicFadeMax[numberOfLEDs];
 
@@ -114,10 +114,10 @@ void setup() {
   memcpy(dynamicFadeMax, dynamicFadeMaxDEFAULT, sizeof dynamicFadeMaxDEFAULT);
   memcpy(dynamicLimitMin, dynamicLimitMinDEFAULT, sizeof dynamicLimitMinDEFAULT);
   memcpy(dynamicLimitMax, dynamicLimitMaxDEFAULT, sizeof dynamicLimitMaxDEFAULT);
-  dynamicFadeMin[0] = dynamicFadeMin[4];  // Set LED0 and LED1's fade rate to the same as everyone else's
-  dynamicFadeMax[0] = dynamicFadeMax[4];  // at first.
-  dynamicFadeMin[1] = dynamicFadeMin[4];
-  dynamicFadeMax[1] = dynamicFadeMax[4];
+  // dynamicFadeMin[0] = dynamicFadeMin[4];  // Set LED0 and LED1's fade rate to the same as everyone else's
+  // dynamicFadeMax[0] = dynamicFadeMax[4];  // at first.
+  // dynamicFadeMin[1] = dynamicFadeMin[4];
+  // dynamicFadeMax[1] = dynamicFadeMax[4];
 }
 
 void loop() {
@@ -131,17 +131,6 @@ void loop() {
   // Roll a die.
   //if (!event) d20 = random(20);
 
-  // Check to see if we're waiting to celebrate, and if everyone has arrived.
-  if ((waitingToCelebrate) && (!enable[0]) && (!enable[1]) && (!enable[2]) && (!enable[3]) && (!enable[4])) {
-    waitingToCelebrate = false;     // We're not waiting anymore!!
-    celebrating = true;             // Start celebrating
-    effectslowSyncronisedFadeUp();  // Modify fade values to a synchronised a long slow fade-up.
-  }
-
-  // TODO: Sequential effect needs a proper trigger.
-  //  if (celebrationRoll == 2) fadeEffect("sequential");
-  if (celebrationRoll > celebrationTrigger) waitingToCelebrate = true;  // Inform everyone it's time to gather for the celebration!
-
   // LED0 section
   if (!enable[0]) digitalWrite(LED0, LOW);
   else if (onCounter[0] > onTime[0]) digitalWrite(LED0, LOW);
@@ -154,12 +143,6 @@ void loop() {
     fadeCounter[0] = 0;
     onTime[0] += dir[0];
 
-
-    if ((celebrating) && (!celebrationRampMaxReached) && (onTime[0] == limit[0])) {
-      celebrationRampMaxReached = true;         // Set flag to track that slow-ramp up has reached brightness of 100%
-      effectPulse();                            // Opportunity to trigger pulsing effect.
-    }
-
     if ((onTime[0] == limit[0]) || (onTime[0] == 0)) {
       dir[0] *= -1;
     }
@@ -169,8 +152,6 @@ void loop() {
       limit[0] = random(dynamicLimitMin[0], dynamicLimitMax[0]);    // pin-specific brightness values
       fadeTimer[0] = random(dynamicFadeMin[0], dynamicFadeMax[0]);  // pin specific dynamic-fade speed variables
       decideLEDState(0);
-
-      celebrationRoutine();
     }
   }
 
@@ -192,8 +173,6 @@ void loop() {
       fadeTimer[1] = random(dynamicFadeMin[1], dynamicFadeMax[1]);
       decideLEDState(1);
 
-      effectFastModeMaintenance(1);
-      celebrationRoll++;  // Celebration dice roll
     }
   }
 
@@ -240,171 +219,13 @@ void compareFadeTimerWithCounter(int pin) {
   }
 }
 
-void effectFastModeMaintenance(int pin) {
-  if (!enable[1]) {  // Only work on a fade-cycle phase where LED1 was enabled.
-    return;
-  }
-  if (fastModeFadeCycleTimer == fastModeCycleCountTrigger) effectFastMode();
-  if (fastModeFadeCycleTimer == 11) endFastMode();                                       // Uh oh coffee has worn off eveyrone is sleepy.
-  if ((!celebrating) && (!waitingToCelebrate) && (!fastMode)) fastModeFadeCycleTimer++;  // Only increment the fast mode
-                                                                                         // counter if celebration-mode flags are false and not already in fast mode.
-  return;
-}
-
-
 
 void decideLEDState(int pin) {
   // Decide if an LED should be enabled next round.
-  if (waitingToCelebrate) {
-    enable[pin] = false;  // Stay disabled
-    return;
-  }
-  if (fastMode) {
-    enable[pin] = true;  // Enable next round
-    return;
-  }
-  if (dynamicFadeTrue[i] == 1001) {  // We are in sequential mode.
-    effectSequentialCheck(pin);
-    return;
-  }
   enable[pin] = random(0, dynamicFadeTrue[pin] + 1) >= dynamicFadeFalse[pin];  // Roll for LED on|off state
   return;
 }
 
-void effectSequentialCheck(int pin) {
-  int previousPin;
-  previousPin = pin - 1;
-  if (previousPin < 0) previousPin = numberOfLEDs;  // For LED0, previous pin will equal 5 or whatever.
-  if (onTime[previousPin] != 15) {                  // How far into it's fade cycle is the LED before me?
-    return;
-  }
-  enable[pin] = true;
-}
-
-// // // Effect stuff
-void effectslowSyncronisedFadeUp() {
-  for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-    fadeTimer[i] = 500;                 // Set very slow fade rate
-    onTime[i] = 0;                      // reset pwm counter.
-    fadeCounter[i] = 0;                 // Reset fade-position counter
-    dir[i] = 1;                         // Direction now = forward
-    limit[i] = 255;
-    enable[i] = true;
-  }
-}
-
-void effectPulse() {
-  for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-    dynamicFadeTrue[i] = 1000;          // Set a high enable roll probability.
-    dynamicFadeFalse[i] = 1;
-    dynamicFadeMin[i] = 50;
-    dynamicFadeMax[i] = 50;
-    dynamicLimitMin[i] = 230;  // The minimum brightness the LED can get is equal
-    dynamicLimitMax[i] = 230;  // to the max. This a pulsing effect
-  }
-  celebrationPeakDirection = random(0, 1);  // Choose a direction for the pulse frequency change
-                                            // 0 = slow down, 1 = speed up
-}
-
-void effectSequentialFlash() {
-  if (dynamicFadeTrue[0] == 1001) {
-    return;  // don't if we're already doing.
-  }
-
-  for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-    dynamicFadeTrue[i] = 1001;          // frequency probability
-    dynamicFadeFalse[i] = 1;
-    dynamicFadeMin[i] = 20;    // duration
-    dynamicFadeMax[i] = 20;    //
-    dynamicLimitMin[i] = 240;  // brightness
-    dynamicLimitMax[i] = 240;  //
-  }
-  prematurelyEndFadeCycle();  // Make every LED finish their current fade REALLY FAST.
-}
-
-void prematurelyEndFadeCycle() {  // Re-set fade speed. Useful to interrupt LEDs in a long fade for a new effect when set low.
-  for (i = 0; i < numberOfLEDs; i++) {
-    //limit[i] = 20;
-    if (dir[i] > 0) dir[i] *= -1;
-    fadeTimer[i] = 20;
-  }
-}
-
-void celebrationRoutine() {
-  if (!celebrating) {
-    return;
-  }
-
-  if (celebrationTimerPhase2 == celebrationLimit) {
-    celebrating = false;
-    waitingToCelebrate = false;
-    celebrationRampMaxReached = false;
-    celebrationTimerPhase2 = 0;
-    celebrationPeakDirection = 0;
-    celebrationPeakDirectionMax = false;
-    // Restore dynamicFadeTrue values from dynamicFadeTrueDEFAULT array.
-    restoreDefaultFadeValues();
-    celebrationRoll = 500;  // Next celebration in 500 cycles
-    return;
-  }
-
-  celebrationTimerPhase2++;  // Only stay in the celebration peak phase for a limited amount of time.
-
-  if ((celebrationPeakDirection == 1)) {
-    for (i = 0; i < numberOfLEDs; i++) {
-      dynamicFadeMin[i]++;
-      dynamicFadeMax[i]++;
-    }
-    return;
-  }
-
-  // We're in the pulse phase. Do something cool.
-  if ((dynamicFadeMin[0] > 10) && (!celebrationPeakDirectionMax)) {
-    // Decrement each cycle
-    for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-      dynamicFadeMin[i]--;
-      dynamicFadeMax[i]--;
-    }
-    celebrationPeakDirectionMax == true;
-    return;
-  }
-
-  for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-    srandom(2499492929);
-    dynamicLimitMin[i] = dynamicLimitMin[i] + random(-4, 1);
-    dynamicLimitMax[i] = dynamicLimitMax[i] + random(-3, 1);
-    dynamicFadeMin[i] = dynamicFadeMin[i] + random((celebrationTimerPhase2 / 2), (celebrationTimerPhase2 * 2));
-    dynamicFadeMax[i] = dynamicFadeMax[i] + random((celebrationTimerPhase2 / 2), (celebrationTimerPhase2 * 2));
-  }
-}
-
-void effectFastMode() {
-  // ON THE nth FADE
-  // Give everyone coffee!!!!!!!!!!!!!!!!!!!!!!!
-  fastMode = true;
-
-  for (i = 0; i < numberOfLEDs; i++) {  // Loop through each LED
-    dynamicFadeTrue[i] = FADETRUEFAST;  // Set a high enable roll probability.
-    dynamicFadeFalse[i] = FADEFALSEFAST;
-    dynamicFadeMin[i] = FADEMINFAST;
-    dynamicFadeMax[i] = FADEMAXFAST;
-  }
-  fadeTimer[0] = random(FADEMINFAST, FADEMAXFAST);  // Hijack LED0's fade timer just in case it's
-                                                    // in the middle of a really long fade. Replace it with something short. That way it
-                                                    // will coffee too!!!!
-  for (i = 0; i < numberOfLEDs; i++) {              // Loop through each LED
-    enable[i] = true;                               // Turn each on.
-  }
-  return;
-}
-
-void endFastMode() {
-  // Restore dynamicFadeTrue values from dynamicFadeTrueDEFAULT array.
-  restoreDefaultFadeValues();
-  fastModeFadeCycleTimer = 0;
-  fastModeCycleCountTrigger = random(FASTMODECYCLETRIGGERMIN, FASTMODECYCLETRIGGERMAX);  // How many LED1 fade cycles until fast mode again?
-  return;
-}
 
 void restoreDefaultFadeValues() {
   memcpy(dynamicFadeTrue, dynamicFadeTrueDEFAULT, sizeof dynamicFadeTrueDEFAULT);
