@@ -179,21 +179,20 @@ void loop() {
 
     if ((celebrating) && (!celebrationRampMaxReached) && (onTime[0] == limit[0])) {
       celebrationRampMaxReached = true;         // Set flag to track that slow-ramp up has reached brightness of 100%
-      celebrationPeakDirection = random(0, 1);  // Choose a direction for the pulsing effect
       effectPulse();                            // Opportunity to trigger pulsing effect.
     }
 
-    else if ((onTime[0] == limit[0]) || (onTime[0] == 0))
+    if ((onTime[0] == limit[0]) || (onTime[0] == 0)) {
       dir[0] *= -1;
+    }
 
     // End of a fade cycle when the LED was on.
     if ((onTime[0] == 0) && (dir[0] = 1)) {
       limit[0] = random(dynamicLimitMin[0], dynamicLimitMax[0]);    // pin-specific brightness values
       fadeTimer[0] = random(dynamicFadeMin[0], dynamicFadeMax[0]);  // pin specific dynamic-fade speed variables
+      decideLEDState(0);
 
       celebrationRoutine();
-
-      decideLEDState(0);
     }
   }
 
@@ -215,7 +214,7 @@ void loop() {
       fadeTimer[1] = random(dynamicFadeMin[1], dynamicFadeMax[1]);
       decideLEDState(1);
 
-      endOfFadeCycleThings(1);
+      effectFastModeMaintenance(1);
       celebrationRoll++;  // Celebration dice roll
     }
   }
@@ -263,11 +262,11 @@ void compareFadeTimerWithCounter(int pin) {
   }
 }
 
-void endOfFadeCycleThings(int pin) {
+void effectFastModeMaintenance(int pin) {
   if (!enable[1]) {  // Only work on a fade-cycle phase where LED1 was enabled.
     return;
   }
-  if (fastModeFadeCycleTimer == fastModeCycleCountTrigger) giveEveryoneCoffee();
+  if (fastModeFadeCycleTimer == fastModeCycleCountTrigger) effectFastMode();
   if (fastModeFadeCycleTimer == 11) endFastMode();                                       // Uh oh coffee has worn off eveyrone is sleepy.
   if ((!celebrating) && (!waitingToCelebrate) && (!fastMode)) fastModeFadeCycleTimer++;  // Only increment the fast mode
                                                                                          // counter if celebration-mode flags are false and not already in fast mode.
@@ -360,6 +359,7 @@ void celebrationRoutine() {
 
   if (celebrationTimerPhase2 == celebrationLimit) {
     celebrating = false;
+    waitingToCelebrate = false;
     celebrationRampMaxReached = false;
     celebrationTimerPhase2 = 0;
     celebrationPeakDirection = 0;
@@ -400,7 +400,7 @@ void celebrationRoutine() {
   }
 }
 
-void giveEveryoneCoffee() {
+void effectFastMode() {
   // ON THE nth FADE
   // Give everyone coffee!!!!!!!!!!!!!!!!!!!!!!!
   fastMode = true;
