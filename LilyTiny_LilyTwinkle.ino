@@ -61,7 +61,7 @@ int fastMode = false;                          // Are we in fast mode?
 // End fast mode -----------------------------------------
 
 // Variables for fade cycle counter. Allows an event to trigger after x fade cycles
-int pin1FadeCycleCompletionCount = 0;
+int fastModeFadeCycleTimer = 0;
 
 // Variable
 boolean waitingToCelebrate = false;  // Are we waiting to celebrate?
@@ -127,7 +127,10 @@ void setup() {
   memcpy(dynamicFadeMax, dynamicFadeMaxDEFAULT, sizeof dynamicFadeMaxDEFAULT);
   memcpy(dynamicLimitMin, dynamicLimitMinDEFAULT, sizeof dynamicLimitMinDEFAULT);
   memcpy(dynamicLimitMax, dynamicLimitMaxDEFAULT, sizeof dynamicLimitMaxDEFAULT);
-  
+  dynamicFadeMin[0] = dynamicFadeMin[5]; // Set LED0 and LED1's fade rate to the same as everyone else's
+  dynamicFadeMax[0] = dynamicFadeMax[5]; // at first.
+  dynamicFadeMin[1] = dynamicFadeMin[5];
+  dynamicFadeMax[1] = dynamicFadeMax[5];
 }
 
 void loop() {
@@ -259,9 +262,9 @@ void endOfFadeCycleThings(int pin) {
   if (!enable[1]) {  // Only work on a fade-cycle phase where LED1 was enabled.
     return;
   }
-  if (pin1FadeCycleCompletionCount == fastModeCycleCountTrigger) giveEveryoneCoffee();
-  if (pin1FadeCycleCompletionCount == 11) endFastMode();                                     // Uh oh coffee has worn off eveyrone is sleepy.
-  if ((!celebrate) && (!waitingToCelebrate) && (!fastMode)) pin1FadeCycleCompletionCount++;  // Only increment the fast mode
+  if (fastModeFadeCycleTimer == fastModeCycleCountTrigger) giveEveryoneCoffee();
+  if (fastModeFadeCycleTimer == 11) endFastMode();                                     // Uh oh coffee has worn off eveyrone is sleepy.
+  if ((!celebrate) && (!waitingToCelebrate) && (!fastMode)) fastModeFadeCycleTimer++;  // Only increment the fast mode
                                                                                              // counter if celebration-mode flags are false and not already in fast mode.
   return;
 }
@@ -425,7 +428,7 @@ void endFastMode() {
   memcpy(dynamicFadeFalse, dynamicFadeFalseDEFAULT, sizeof dynamicFadeFalseDEFAULT);
   memcpy(dynamicFadeMin, dynamicFadeMinDEFAULT, sizeof dynamicFadeMinDEFAULT);
   memcpy(dynamicFadeMax, dynamicFadeMaxDEFAULT, sizeof dynamicFadeMaxDEFAULT);
-  pin1FadeCycleCompletionCount = 0;
+  fastModeFadeCycleTimer = 0;
   fastModeCycleCountTrigger = random(FASTMODECYCLETRIGGERMIN, FASTMODECYCLETRIGGERMAX);  // How many LED1 fade cycles until fast mode again?
   return;
 }
