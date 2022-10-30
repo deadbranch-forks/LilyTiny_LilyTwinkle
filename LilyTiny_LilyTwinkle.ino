@@ -69,7 +69,7 @@ boolean celebrate = false;           // Are we celebrating right now?
 boolean celebrationRampMaxReached = false;     // Flag to identify when PWM duty cycle = 100% on celebration brightness ramp-up
 int celebrationRoll = 0;             // Dice roll
 // int celebrationTrigger = random(50, 500); // Holds the magic number to match for celebrations.
-int celebrationTrigger = 1; // Holds the magic number to match for celebrations.
+int celebrationTrigger = 10; // Holds the magic number to match for celebrations.
 
 
 byte celebrationPeakDirection = 0;
@@ -81,8 +81,8 @@ const int numberOfLEDs = 5;  // Number of LED GPIO pins
 // Constant replacement arrays
 
 // Keep a copy of the "default" fade probabilities and speeds.
-const int dynamicFadeMinDEFAULT[numberOfLEDs] = { 150, 150, 50, 50, 50 };
-const int dynamicFadeMaxDEFAULT[numberOfLEDs] = { 355, 355, 55, 55, 55 };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+const int dynamicFadeMinDEFAULT[numberOfLEDs] = { 70, 50, 50, 50, 50 };
+const int dynamicFadeMaxDEFAULT[numberOfLEDs] = { 200, 255, 55, 55, 55 };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
 int dynamicFadeMin[numberOfLEDs]; // Initialize empty array to avoid duplication. Populated using memcpy in setup();
 int dynamicFadeMax[numberOfLEDs];
 
@@ -127,15 +127,7 @@ void setup() {
   memcpy(dynamicFadeMax, dynamicFadeMaxDEFAULT, sizeof dynamicFadeMaxDEFAULT);
   memcpy(dynamicLimitMin, dynamicLimitMinDEFAULT, sizeof dynamicLimitMinDEFAULT);
   memcpy(dynamicLimitMax, dynamicLimitMaxDEFAULT, sizeof dynamicLimitMaxDEFAULT);
-
-  // for (i = 0; i < 1; i++) { 
-  //   dynamicFadeMin[i] = FADEMIN;
-  //   dynamicFadeMax[i] = FADEMAX;
-  //   dynamicFadeTrue[i] = FADETRUE;
-  //   dynamicFadeFalse[i] = FADEFALSE;
-  //   dynamicLimitMin[i] = LIMITMIN;
-  //   dynamicLimitMax[i] = LIMITMAX;
-  // }
+  
 }
 
 void loop() {
