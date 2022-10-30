@@ -23,28 +23,6 @@
 #define LED3 PA1
 #define LED4 PA0
 
-#define FADEMIN 50
-#define FADEMAX 55
-#define FADEFALSE 25
-#define FADETRUE 30
-#define LIMITMIN 125
-#define LIMITMAX 255
-
-// Restricting LED groups 0 and 1 to a minimum 90% PWM duty cycle ensurs that
-// the NOT gate LEDs actually turn off during the fade loop.
-#define LIMITMIN0 230  // LED 0 brightness limit
-#define LIMITMAX0 255
-#define LIMITMIN1 230
-#define LIMITMAX1 255
-#define FADEMIN0 150  // LED0 gets a different fade rate than everyone else.
-#define FADEMAX0 355
-#define FADEMIN1 150
-#define FADEMAX1 355
-#define FADEFALSE0 7  // LED0 rolls enable more often
-#define FADETRUE0 30
-#define FADEFALSE1 8
-#define FADETRUE1 30
-
 // Fast mode stuff -------------------------------------
 #define FADEMINFAST 20  // Alternative "fast-mode" fade rate. Should be fast!
 #define FADEMAXFAST 30
