@@ -65,11 +65,11 @@ int fastModeFadeCycleTimer = 0;
 
 // Variable
 boolean waitingToCelebrate = false;         // Are we waiting to celebrate?
-boolean celebrate = false;                  // Are we celebrating right now?
+boolean celebrating = false;                  // Are we celebrating right now?
 boolean celebrationRampMaxReached = false;  // Flag to identify when PWM duty cycle = 100% on celebration brightness ramp-up
 int celebrationRoll = 0;                    // Dice roll
 // int celebrationTrigger = random(50, 500); // Holds the magic number to match for celebrations.
-int celebrationTrigger = 10;  // Holds the magic number to match for celebrations.
+int celebrationTrigger = 40;  // Holds the magic number to match for celebrations.
 
 
 byte celebrationPeakDirection = 0;
@@ -81,18 +81,18 @@ const int numberOfLEDs = 5;  // Number of LED GPIO pins
 // Constant replacement arrays
 
 // Keep a copy of the "default" fade probabilities and speeds.
-const int dynamicFadeMinDEFAULT[numberOfLEDs] = { 70, 50, 50, 50, 50 };
-const int dynamicFadeMaxDEFAULT[numberOfLEDs] = { 200, 255, 55, 55, 55 };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+const int dynamicFadeMinDEFAULT[numberOfLEDs] = { 70, 50, 40, 5, 50 };
+const int dynamicFadeMaxDEFAULT[numberOfLEDs] = { 200, 255, 55, 15, 55 };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
 int dynamicFadeMin[numberOfLEDs];                                          // Initialize empty array to avoid duplication. Populated using memcpy in setup();
 int dynamicFadeMax[numberOfLEDs];
 
 const int dynamicFadeTrueDEFAULT[numberOfLEDs] = { 30, 30, 30, 30, 30 };  // Values determining success probability of roll to enable LED next round.
-const int dynamicFadeFalseDEFAULT[numberOfLEDs] = { 8, 7, 25, 25, 25 };
+const int dynamicFadeFalseDEFAULT[numberOfLEDs] = { 8, 7, 25, 10, 25 };
 int dynamicFadeTrue[numberOfLEDs];
 int dynamicFadeFalse[numberOfLEDs];
 
-const int dynamicLimitMinDEFAULT[numberOfLEDs] = { 230, 230, 125, 125, 125 };  // Available brightness range on each roll
-const int dynamicLimitMaxDEFAULT[numberOfLEDs] = { 255, 255, 255, 255, 255 };
+const int dynamicLimitMinDEFAULT[numberOfLEDs] = { 230, 230, 125, 5, 125 };  // Available brightness range on each roll
+const int dynamicLimitMaxDEFAULT[numberOfLEDs] = { 255, 255, 255, 100, 255 };
 int dynamicLimitMin[numberOfLEDs];
 int dynamicLimitMax[numberOfLEDs];
 
@@ -110,11 +110,14 @@ byte limit[numberOfLEDs] = { 255, 255, 255, 255, 255 };
 //boolean enable[numberOfLEDs] = { random(1), random(1), random(1), random(1), random(1) };
 boolean enable[numberOfLEDs] = { true, true, true, true, true };
 
+byte d20 = 0; // Event die. 
+boolean event = false;  // Are we in an event right now?
 
 // Wait in microseconds before allowing loop() to process again
 long delayTime = 50;
 long startTime = 0;
 
+// For loop thing
 byte i;
 
 void setup() {
@@ -145,19 +148,21 @@ void loop() {
   if ((currTime - startTime) < delayTime) {
     return;
   }
-
   startTime = currTime;  // Start the timer over.
+
+  // Roll a die.
+  if (!event) d20 = random(20);
 
   // Check to see if we're waiting to celebrate, and if everyone has arrived.
   if ((waitingToCelebrate) && (!enable[0]) && (!enable[1]) && (!enable[2]) && (!enable[3]) && (!enable[4])) {
     waitingToCelebrate = false;           // We're not waiting anymore!!
-    celebrate = true;                     // Start celebrating
-    fadeEffect("slowSyncronisedFadeUp");  // Modify fade-setting values for a synchronised a long slow fade-up.
+    celebrating = true;                     // Start celebrating
+    fadeEffect("slowSyncronisedFadeUp");  // Modify fade values to a synchronised a long slow fade-up.
   }
 
   // TODO: Sequential effect needs a proper trigger.
   //  if (celebrationRoll == 2) fadeEffect("sequential");
-  if (celebrationRoll == celebrationTrigger) waitingToCelebrate = true;  // Inform everyone it's time to gather for the celebration!
+  if (d20 > celebrationTrigger) waitingToCelebrate = true;  // Inform everyone it's time to gather for the celebration!
 
   // LED0 section
   if (!enable[0]) digitalWrite(LED0, LOW);
@@ -362,7 +367,7 @@ void celebrationRoutine() {
   }
 
   if (celebrationTimerPhase2 == celebrationLimit) {
-    celebrate = false;
+    celebrating = false;
     celebrationRampMaxReached = false;
     celebrationTimerPhase2 = 0;
     celebrationPeakDirection = 0;
