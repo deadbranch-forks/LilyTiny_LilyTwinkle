@@ -1,0 +1,7 @@
+{
+    "configuration": "LTO=enable,chip=84,clock=8internal,eesave=aenable,bod=disable,pinmapping=anew,millis=enabled,neopixelport=porta",
+    "board": "ATTinyCore:avr:attinyx4",
+    "programmer": "arduinoOTA104",
+    "sketch": "LilyTiny_LilyTwinkle.ino",
+    "output": "/build/vscodeoutput"
+}

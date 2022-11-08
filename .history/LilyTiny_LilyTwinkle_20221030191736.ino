@@ -14,7 +14,7 @@
 // ATtiny84 pin definitions
 // #define LED0 0
 // #define LED1 1
-// #define LED2 21
+// #define LED2 2
 // #define LED3 3
 // #define LED4 7
 #define LED0 9   // not gate red
