@@ -5,6 +5,24 @@
 //  is necessary to program the fuse bits to disable the divide-by-8
 //  on the clock frequency.
 
+
+//-- OLED stuff
+  // Test for minimum program size.
+  #define RTN_CHECK 1
+
+  #include <Wire.h>
+  #include "SSD1306Ascii.h"
+  #include "SSD1306AsciiWire.h"
+
+  // 0X3C+SA0 - 0x3C or 0x3D
+  #define I2C_ADDRESS 0x3C
+
+  // Define proper RST_PIN if required.
+  #define RST_PIN -1
+
+  SSD1306AsciiWire oled;
+//-- end OLED stuff
+
 // ATtiny85 pin definitions
 // #define LED0 0
 // #define LED1 1
@@ -94,6 +112,11 @@ boolean event = false;  // Are we in an event right now?
 // Wait in microseconds before allowing loop() to process again
 long delayTime = 50;
 long startTime = 0;
+long i2cStartTime = 0; // for i2c debugging
+int i2cPWMCOunt = 0;
+int i2c5secondAverage = 0;
+int i2c5secondAverageHolder = 0;
+byte i2c5secondAverageCounter = 0;
 
 // For loop thing
 byte i;
@@ -115,18 +138,59 @@ void setup() {
   memcpy(dynamicLimitMin, dynamicLimitMinDEFAULT, sizeof dynamicLimitMinDEFAULT);
   memcpy(dynamicLimitMax, dynamicLimitMaxDEFAULT, sizeof dynamicLimitMaxDEFAULT);
   // dynamicFadeMin[0] = dynamicFadeMin[4];  // Set LED0 and LED1's fade rate to the same as everyone else's
-  // dynamicFadeMax[0] = dynamicFadeMax[4];  // at first.
+  // dynamicFadeMax[0] = dynamicFadeMax[4];  // ccccccat first.
   // dynamicFadeMin[1] = dynamicFadeMin[4];
   // dynamicFadeMax[1] = dynamicFadeMax[4];
+
+  //-- OLED stuff
+    Wire.begin();
+    Wire.setClock(400000L);
+
+    // #if RST_PIN >= 0
+    // oled.begin(&Adafruit128x32, I2C_ADDRESS, RST_PIN);
+    // #else   // RST_PIN >= 0
+     oled.begin(&Adafruit128x32, I2C_ADDRESS);
+    // #endif  // RST_PIN >= 0
+
+    // // Use Adafruit5x7, field at row 2, set1X, columns 16 through 100.
+    oled.setFont(System5x7);
+    oled.displayRemap(true);
+  //-- end OLED stuff
 }
 
 void loop() {
   long currTime = micros();
 
+  if ((currTime - i2cStartTime) > 1000000) {  // 1s
+
+  i2c5secondAverageCounter++;
+  i2c5secondAverageHolder = i2c5secondAverageHolder + (currTime - i2cStartTime);
+
+    //oled.clear();
+    oled.print(i2cPWMCOunt);
+    oled.print(" fps (");
+    oled.print(i2c5secondAverage);
+    oled.println(")");
+    i2cStartTime = currTime;
+    i2cPWMCOunt = 0;
+
+
+
+  if (i2c5secondAverageCounter == 5) {
+    i2c5secondAverage = (i2c5secondAverageHolder / 5);
+    i2c5secondAverageHolder = 0;
+    i2c5secondAverageCounter = 0;
+  }
+
+
+  }
+
   if ((currTime - startTime) < delayTime) {
     return;
   }
   startTime = currTime;  // Start the timer over.
+
+  i2cPWMCOunt++;
 
   // Roll a die.
   //if (!event) d20 = random(20);
@@ -208,10 +272,12 @@ void compareFadeTimerWithCounter(int pin) {
   if (fadeCounter[pin] < fadeTimer[pin]) {
     return;
   }
+
   fadeCounter[pin] = 0;  // Reset counter
   onTime[pin] += dir[pin];
 
   if ((onTime[pin] == limit[pin]) || (onTime[pin] == 0)) dir[pin] *= -1;  // change fade direction
+
   if ((onTime[pin] == 0) && (dir[pin] = 1)) {                             // Timer has run out and fade direction had reached 0 (and reversed)
     limit[pin] = random(dynamicLimitMin[pin], dynamicLimitMax[pin]);      // Brightness limit
     fadeTimer[pin] = random(dynamicFadeMin[pin], dynamicFadeMax[pin]);    // Fade cycle speed
