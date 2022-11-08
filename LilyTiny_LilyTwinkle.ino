@@ -34,55 +34,55 @@
 
 // After how many fade cycles will the first fast mode trigger?
 //int fastModeCycleCountTrigger = random(3, 5);  // Make sure fast mode triggers quickly the first time after opening the box.
-int fastModeCycleCountTrigger = random(FASTMODECYCLETRIGGERMIN, FASTMODECYCLETRIGGERMAX);
-int fastMode = false;  // Are we in fast mode?
+byte fastModeCycleCountTrigger = random(FASTMODECYCLETRIGGERMIN, FASTMODECYCLETRIGGERMAX);
+boolean fastMode = false;  // Are we in fast mode?
 // End fast mode -----------------------------------------
 
 // Variables for fade cycle counter. Allows an event to trigger after x fade cycles
-int fastModeFadeCycleTimer = 0;
+byte fastModeFadeCycleTimer = 0;
 
 // Variable
 boolean waitingToCelebrate = false;         // Are we waiting to celebrate?
 boolean celebrating = false;                // Are we celebrating right now?
 boolean celebrationRampMaxReached = false;  // Flag to identify when PWM duty cycle = 100% on celebration brightness ramp-up
-int celebrationRoll = 0;                    // Dice roll
+byte celebrationRoll = 0;                    // Dice roll
 // int celebrationTrigger = random(50, 500); // Holds the magic number to match for celebrations.
-int celebrationTrigger = 40;  // Holds the magic number to match for celebrations.
+byte celebrationTrigger = 40;  // Holds the magic number to match for celebrations.
 
 
 byte celebrationPeakDirection = 0;
-int celebrationTimerPhase2 = 0;
-int celebrationLimit = 200;
+byte celebrationTimerPhase2 = 0;
+byte celebrationLimit = 200;
 boolean celebrationPeakDirectionMax = false;
 
-const int numberOfLEDs = 5;  // Number of LED GPIO pins
+const byte numberOfLEDs = 5;  // Number of LED GPIO pins
 // Constant replacement arrays
 
 // Keep a copy of the "default" fade probabilities and speeds.
-const int dynamicFadeMinDEFAULT[numberOfLEDs] = { 70, 50, 40, 30, 50 };
-const int dynamicFadeMaxDEFAULT[numberOfLEDs] = { 200, 255, 55, 40, 55 };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
-int dynamicFadeMin[numberOfLEDs];                                          // Initialize empty array to avoid duplication. Populated using memcpy in setup();
-int dynamicFadeMax[numberOfLEDs];
+const byte dynamicFadeMinDEFAULT[numberOfLEDs] = { 70, 50, 40, 30, 50 };
+const byte dynamicFadeMaxDEFAULT[numberOfLEDs] = { 200, 255, 55, 40, 55 };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+byte dynamicFadeMin[numberOfLEDs];                                          // Initialize empty array to avoid duplication. Populated using memcpy in setup();
+byte dynamicFadeMax[numberOfLEDs];
 
-const int dynamicFadeTrueDEFAULT[numberOfLEDs] = { 30, 30, 30, 30, 30 };  // Values determining success probability of roll to enable LED next round.
-const int dynamicFadeFalseDEFAULT[numberOfLEDs] = { 8, 7, 25, 10, 25 };
-int dynamicFadeTrue[numberOfLEDs];
-int dynamicFadeFalse[numberOfLEDs];
+const byte dynamicFadeTrueDEFAULT[numberOfLEDs] = { 30, 30, 30, 30, 30 };  // Values determining success probability of roll to enable LED next round.
+const byte dynamicFadeFalseDEFAULT[numberOfLEDs] = { 8, 7, 25, 10, 25 };
+byte dynamicFadeTrue[numberOfLEDs];
+byte dynamicFadeFalse[numberOfLEDs];
 
-const int dynamicLimitMinDEFAULT[numberOfLEDs] = { 230, 230, 125, 5, 125 };  // Available brightness range on each roll
-const int dynamicLimitMaxDEFAULT[numberOfLEDs] = { 255, 255, 255, 100, 255 };
-int dynamicLimitMin[numberOfLEDs];
-int dynamicLimitMax[numberOfLEDs];
+const byte dynamicLimitMinDEFAULT[numberOfLEDs] = { 230, 230, 125, 5, 125 };  // Available brightness range on each roll
+const byte dynamicLimitMaxDEFAULT[numberOfLEDs] = { 255, 255, 255, 100, 255 };
+byte dynamicLimitMin[numberOfLEDs];
+byte dynamicLimitMax[numberOfLEDs];
 
 // General-operation-variable arrays
-int fadeTimer[numberOfLEDs] = { random(dynamicFadeMinDEFAULT[4], dynamicFadeMaxDEFAULT[4]),
+byte fadeTimer[numberOfLEDs] = { random(dynamicFadeMinDEFAULT[4], dynamicFadeMaxDEFAULT[4]),
                                 random(dynamicFadeMinDEFAULT[4], dynamicFadeMaxDEFAULT[4]),
                                 random(dynamicFadeMinDEFAULT[2], dynamicFadeMaxDEFAULT[2]),
                                 random(dynamicFadeMinDEFAULT[3], dynamicFadeMaxDEFAULT[3]),
                                 random(dynamicFadeMinDEFAULT[4], dynamicFadeMaxDEFAULT[4]) };  // Value of variable for each LED n
 byte onTime[numberOfLEDs] = { 0, 0, 0, 0, 0 };
 byte onCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
-int fadeCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
+byte fadeCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
 char dir[numberOfLEDs] = { 1, 1, 1, 1, 1 };
 byte limit[numberOfLEDs] = { 255, 255, 255, 255, 255 };
 //boolean enable[numberOfLEDs] = { random(1), random(1), random(1), random(1), random(1) };
