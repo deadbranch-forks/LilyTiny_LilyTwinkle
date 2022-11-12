@@ -1,11 +1,3 @@
-// AVRDUDE fuse settings string:
-// avrdude -p t85 -c avrispmkii -B 4 -P usb -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
-// By the time most users see this board, these settings will already
-//  have been applied. However, when programming from a blank ATTiny, it
-//  is necessary to program the fuse bits to disable the divide-by-8
-//  on the clock frequency.
-
-
 //-- OLED stuff
   // Test for minimum program size.
   #define RTN_CHECK 1
@@ -35,92 +27,111 @@
 // #define LED2 21
 // #define LED3 3
 // #define LED4 7
-#define LED0 9   // not gate red
+#define LED0 9   // not gate red & gate
 #define LED1 10  // not gate blue
 #define LED2 PA2
 #define LED3 PA1
 #define LED4 PA0
 
 // Fast mode stuff -------------------------------------
-#define FADEMINFAST 20  // Alternative "fast-mode" fade rate. Should be fast!
-#define FADEMAXFAST 30
-#define FADEFALSEFAST 15  // Fast mode-dice rolls. Should make more bright :D
-#define FADETRUEFAST 30
+  #define FADEMINFAST 20  // Alternative "fast-mode" fade rate. Should be fast!
+  #define FADEMAXFAST 30
+  #define FADEFALSEFAST 15  // Fast mode-dice rolls. Should make more bright :D
+  #define FADETRUEFAST 30
 
-#define FASTMODECYCLETRIGGERMIN 3   //  Used in a random number generator. Minimum fade cycles until next fast mode
-#define FASTMODECYCLETRIGGERMAX 20  // Maximum fade cycles until next random fast mode
+  #define FASTMODECYCLETRIGGERMIN 3   //  Used in a random number generator. Minimum fade cycles until next fast mode
+  #define FASTMODECYCLETRIGGERMAX 20  // Maximum fade cycles until next random fast mode
 
-// After how many fade cycles will the first fast mode trigger?
-//int fastModeCycleCountTrigger = random(3, 5);  // Make sure fast mode triggers quickly the first time after opening the box.
-byte fastModeCycleCountTrigger = random(FASTMODECYCLETRIGGERMIN, FASTMODECYCLETRIGGERMAX);
-boolean fastMode = false;  // Are we in fast mode?
-// End fast mode -----------------------------------------
+//-- Button debounce declarations
+  const int buttonPin = 8;
+  short int latchState = -1;
+  int ledState = HIGH;
+  int buttonState;
+  int lastButtonState = LOW;
+  unsigned long lastDebounceTime = 0;
+  unsigned long debounceDelay = 50;
+//
 
-// Variables for fade cycle counter. Allows an event to trigger after x fade cycles
-byte fastModeFadeCycleTimer = 0;
+//-- Fast mode declarations
+  // After how many fade cycles will the first fast mode trigger?
+  // int fastModeCycleCountTrigger = random(3, 5);  // Make sure fast mode triggers quickly the first time after opening the box.
+  byte fastModeCycleCountTrigger = random(FASTMODECYCLETRIGGERMIN, FASTMODECYCLETRIGGERMAX);
+  boolean fastMode = false;  // Are we in fast mode?
 
-// Variable
-boolean waitingToCelebrate = false;         // Are we waiting to celebrate?
-boolean celebrating = false;                // Are we celebrating right now?
-boolean celebrationRampMaxReached = false;  // Flag to identify when PWM duty cycle = 100% on celebration brightness ramp-up
-byte celebrationRoll = 0;                    // Dice roll
-// int celebrationTrigger = random(50, 500); // Holds the magic number to match for celebrations.
-byte celebrationTrigger = 40;  // Holds the magic number to match for celebrations.
+  // Variables for fade cycle counter. Allows an event to trigger after x fade cycles
+  byte fastModeFadeCycleTimer = 0;
 
+//-- Celebration variable declarations
+  boolean waitingToCelebrate = false;         // Are we waiting to celebrate?
+  boolean celebrating = false;                // Are we celebrating right now?
+  boolean celebrationRampMaxReached = false;  // Flag to identify when PWM duty cycle = 100% on celebration brightness ramp-up
+  byte celebrationRoll = 0;                   // Dice roll
+  // int celebrationTrigger = random(50, 500); // Holds the magic number to match for celebrations.
+  byte celebrationTrigger = 40;  // Holds the magic number to match for celebrations.
 
-byte celebrationPeakDirection = 0;
-byte celebrationTimerPhase2 = 0;
-byte celebrationLimit = 200;
-boolean celebrationPeakDirectionMax = false;
+  byte celebrationPeakDirection = 0;
+  byte celebrationTimerPhase2 = 0;
+  byte celebrationLimit = 200;
+  boolean celebrationPeakDirectionMax = false;
 
-const byte numberOfLEDs = 5;  // Number of LED GPIO pins
-// Constant replacement arrays
+// Fade cycle parameter values
+  const byte numberOfLEDs = 5;  // Number of LED GPIO pins
 
-// Keep a copy of the "default" fade probabilities and speeds.
-const byte dynamicFadeMinDEFAULT[numberOfLEDs] = { 70, 50, 40, 30, 50 };
-const byte dynamicFadeMaxDEFAULT[numberOfLEDs] = { 200, 255, 55, 40, 55 };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
-byte dynamicFadeMin[numberOfLEDs];                                          // Initialize empty array to avoid duplication. Populated using memcpy in setup();
-byte dynamicFadeMax[numberOfLEDs];
+  // Keep a copy of the "default" fade probabilities and speeds.
+  const byte dynamicFadeMinDEFAULT[numberOfLEDs] = { 70, 50, 40, 30, 50 };
+  const byte dynamicFadeMaxDEFAULT[numberOfLEDs] = { 200, 255, 55, 40, 55 };  // But start out with the default rate so LED0 has a better chance to get coffee with the rest (the first time)
+  byte dynamicFadeMin[numberOfLEDs];                                          // Initialize empty array to avoid duplication. Populated using memcpy in setup();
+  byte dynamicFadeMax[numberOfLEDs];
 
-const byte dynamicFadeTrueDEFAULT[numberOfLEDs] = { 30, 30, 30, 30, 30 };  // Values determining success probability of roll to enable LED next round.
-const byte dynamicFadeFalseDEFAULT[numberOfLEDs] = { 8, 7, 25, 10, 25 };
-byte dynamicFadeTrue[numberOfLEDs];
-byte dynamicFadeFalse[numberOfLEDs];
+  const byte dynamicFadeTrueDEFAULT[numberOfLEDs] = { 30, 30, 30, 30, 30 };  // Values determining success probability of roll to enable LED next round.
+  const byte dynamicFadeFalseDEFAULT[numberOfLEDs] = { 8, 7, 25, 10, 25 };
+  byte dynamicFadeTrue[numberOfLEDs];
+  byte dynamicFadeFalse[numberOfLEDs];
 
-const byte dynamicLimitMinDEFAULT[numberOfLEDs] = { 230, 230, 125, 5, 125 };  // Available brightness range on each roll
-const byte dynamicLimitMaxDEFAULT[numberOfLEDs] = { 255, 255, 255, 100, 255 };
-byte dynamicLimitMin[numberOfLEDs];
-byte dynamicLimitMax[numberOfLEDs];
+  const byte dynamicLimitMinDEFAULT[numberOfLEDs] = { 230, 230, 125, 5, 125 };  // Available brightness range on each roll
+  const byte dynamicLimitMaxDEFAULT[numberOfLEDs] = { 255, 255, 255, 100, 255 };
+  byte dynamicLimitMin[numberOfLEDs];
+  byte dynamicLimitMax[numberOfLEDs];
 
-// General-operation-variable arrays
-byte fadeTimer[numberOfLEDs] = { random(dynamicFadeMinDEFAULT[4], dynamicFadeMaxDEFAULT[4]),
-                                random(dynamicFadeMinDEFAULT[4], dynamicFadeMaxDEFAULT[4]),
-                                random(dynamicFadeMinDEFAULT[2], dynamicFadeMaxDEFAULT[2]),
-                                random(dynamicFadeMinDEFAULT[3], dynamicFadeMaxDEFAULT[3]),
-                                random(dynamicFadeMinDEFAULT[4], dynamicFadeMaxDEFAULT[4]) };  // Value of variable for each LED n
-byte onTime[numberOfLEDs] = { 0, 0, 0, 0, 0 };
-byte onCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
-byte fadeCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
-char dir[numberOfLEDs] = { 1, 1, 1, 1, 1 };
-byte limit[numberOfLEDs] = { 255, 255, 255, 255, 255 };
-//boolean enable[numberOfLEDs] = { random(1), random(1), random(1), random(1), random(1) };
-boolean enable[numberOfLEDs] = { true, true, true, true, true };
+// LED PWM state monitoring
+  byte fadeTimer[numberOfLEDs] = { random(dynamicFadeMinDEFAULT[4], dynamicFadeMaxDEFAULT[4]),
+                                  random(dynamicFadeMinDEFAULT[4], dynamicFadeMaxDEFAULT[4]),
+                                  random(dynamicFadeMinDEFAULT[2], dynamicFadeMaxDEFAULT[2]),
+                                  random(dynamicFadeMinDEFAULT[3], dynamicFadeMaxDEFAULT[3]),
+                                  random(dynamicFadeMinDEFAULT[4], dynamicFadeMaxDEFAULT[4]) };  // Value of variable for each LED n
+  byte onTime[numberOfLEDs] = { 0, 0, 0, 0, 0 };
+  byte onCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
+  byte fadeCounter[numberOfLEDs] = { 0, 0, 0, 0, 0 };
+  char dir[numberOfLEDs] = { 1, 1, 1, 1, 1 };
+  byte limit[numberOfLEDs] = { 255, 255, 255, 255, 255 };
+  //boolean enable[numberOfLEDs] = { random(1), random(1), random(1), random(1), random(1) };
+  boolean enable[numberOfLEDs] = { true, true, true, true, true };
 
-byte d20 = 0;           // Event die.
-boolean event = false;  // Are we in an event right now?
+// Event state machine
+  byte d20 = 0;           // Event die.
+  boolean event = false;  // Are we in an event right now?
+                        //
 
-// Wait in microseconds before allowing loop() to process again
-long delayTime = 50;
-long startTime = 0;
-long i2cStartTime = 0; // for i2c debugging
-int i2cPWMCOunt = 0;
-int i2c5secondAverage = 0;
-int i2c5secondAverageHolder = 0;
-byte i2c5secondAverageCounter = 0;
+// Main loop timing
+  // Wait in microseconds before allowing loop() to process again
+  long delayTime = 50;
+  long startTime = 0;
 
-// For loop thing
-byte i;
+// OLED I2C Looper stuff
+  // Loop timing
+  // long i2cStartTime = 0;  // for i2c debugging
+  // int i2cPWMCOunt = 0;
 
+  // Math
+  // int i2c5secondAverage = 0;
+  // int i2c5secondAverageHolder = 0;
+  // byte i2c5secondAverageCounter = 0;
+
+  // For loop thing
+  byte i;
+//
+
+// Setup
 void setup() {
   randomSeed(analogRead(3));
   pinMode(LED0, OUTPUT);
@@ -142,55 +153,80 @@ void setup() {
   // dynamicFadeMin[1] = dynamicFadeMin[4];
   // dynamicFadeMax[1] = dynamicFadeMax[4];
 
-  //-- OLED stuff
-    Wire.begin();
-    Wire.setClock(400000L);
+  // OLED setup
+  Wire.begin();
+  Wire.setClock(400000L);
 
-    // #if RST_PIN >= 0
-    // oled.begin(&Adafruit128x32, I2C_ADDRESS, RST_PIN);
-    // #else   // RST_PIN >= 0
-     oled.begin(&Adafruit128x32, I2C_ADDRESS);
-    // #endif  // RST_PIN >= 0
+  // #if RST_PIN >= 0
+  // oled.begin(&Adafruit128x32, I2C_ADDRESS, RST_PIN);
+  // #else   // RST_PIN >= 0
+  oled.begin(&Adafruit128x32, I2C_ADDRESS);
+  // #endif  // RST_PIN >= 0
 
-    // // Use Adafruit5x7, field at row 2, set1X, columns 16 through 100.
-    oled.setFont(System5x7);
-    oled.displayRemap(true);
-  //-- end OLED stuff
+  // // Use Adafruit5x7, field at row 2, set1X, columns 16 through 100.
+  oled.setFont(System5x7);
+  oled.displayRemap(true);
+  //
+
+  // Button debounce setup
+  pinMode(buttonPin, INPUT);
 }
 
 void loop() {
   long currTime = micros();
 
-  if ((currTime - i2cStartTime) > 1000000) {  // 1s
+  // Button Debounce stuff
+    // int reading = digitalRead(buttonPin);
+    // if (reading != lastButtonState) {
+    //   lastDebounceTime = millis();
+    // }
 
-  i2c5secondAverageCounter++;
-  i2c5secondAverageHolder = i2c5secondAverageHolder + (currTime - i2cStartTime);
+    // if ((millis() - lastDebounceTime) > debounceDelay) {
+    //   if (reading != buttonState) {
+    //     buttonState = reading;
+    //     oled.print("state: ");
+    //     oled.println(buttonState);
+    //   }
+    //   if (buttonState = HIGH) {
+    //     ledState = !ledState;
+    //   }
+    // }
+    // // oled.print("state: ");
+    // // oled.print(ledState);
+    // lastButtonState = reading;
+  //
+
+  // I2C ILED stuff
+    // if ((currTime - i2cStartTime) > 1000000) {  // 1s
+    // i2c5secondAverageCounter++;
+    // i2c5secondAverageHolder = i2c5secondAverageHolder + (currTime - i2cStartTime);
 
     //oled.clear();
-    oled.print(i2cPWMCOunt);
-    oled.print(" fps (");
-    oled.print(i2c5secondAverage);
-    oled.println(")");
-    i2cStartTime = currTime;
-    i2cPWMCOunt = 0;
-
-
-
-  if (i2c5secondAverageCounter == 5) {
-    i2c5secondAverage = (i2c5secondAverageHolder / 5);
-    i2c5secondAverageHolder = 0;
-    i2c5secondAverageCounter = 0;
-  }
-
-
-  }
+    // oled.print(i2cPWMCOunt);
+    // oled.print(" fps (");
+    // oled.print(i2c5secondAverage);
+    // oled.println(")");
+    // i2cStartTime = currTime;
+    // i2cPWMCOunt = 0;
+    // if (i2c5secondAverageCounter == 5) {
+    //   i2c5secondAverage = (i2c5secondAverageHolder / 5);
+    //   i2c5secondAverageHolder = 0;
+    //   i2c5secondAverageCounter = 0;
+    // }
+  // }
 
   if ((currTime - startTime) < delayTime) {
     return;
   }
   startTime = currTime;  // Start the timer over.
 
-  i2cPWMCOunt++;
+  int reading = digitalRead(buttonPin);
+  oledDisplay(reading);
+
+
+
+
+  //i2cPWMCOunt++;
 
   // Roll a die.
   //if (!event) d20 = random(20);
@@ -236,7 +272,6 @@ void loop() {
       limit[1] = random(dynamicLimitMin[1], dynamicLimitMax[1]);  // pin-specific brightness values
       fadeTimer[1] = random(dynamicFadeMin[1], dynamicFadeMax[1]);
       decideLEDState(1);
-
     }
   }
 
@@ -278,9 +313,9 @@ void compareFadeTimerWithCounter(int pin) {
 
   if ((onTime[pin] == limit[pin]) || (onTime[pin] == 0)) dir[pin] *= -1;  // change fade direction
 
-  if ((onTime[pin] == 0) && (dir[pin] = 1)) {                             // Timer has run out and fade direction had reached 0 (and reversed)
-    limit[pin] = random(dynamicLimitMin[pin], dynamicLimitMax[pin]);      // Brightness limit
-    fadeTimer[pin] = random(dynamicFadeMin[pin], dynamicFadeMax[pin]);    // Fade cycle speed
+  if ((onTime[pin] == 0) && (dir[pin] = 1)) {                           // Timer has run out and fade direction had reached 0 (and reversed)
+    limit[pin] = random(dynamicLimitMin[pin], dynamicLimitMax[pin]);    // Brightness limit
+    fadeTimer[pin] = random(dynamicFadeMin[pin], dynamicFadeMax[pin]);  // Fade cycle speed
     decideLEDState(pin);
   }
 }
@@ -300,4 +335,38 @@ void restoreDefaultFadeValues() {
   memcpy(dynamicFadeMax, dynamicFadeMaxDEFAULT, sizeof dynamicFadeMaxDEFAULT);
   memcpy(dynamicLimitMin, dynamicLimitMinDEFAULT, sizeof dynamicLimitMinDEFAULT);
   memcpy(dynamicLimitMax, dynamicLimitMaxDEFAULT, sizeof dynamicLimitMaxDEFAULT);
+}
+
+void oledDisplay(int reading) {
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis();
+  }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+
+    if (reading != buttonState) {
+      buttonState = reading;
+
+      latchStateToggle(buttonState, latchState);
+
+
+      oled.clear();
+      oled.print("st: ");
+      oled.print(buttonState);
+      // oled.print(lastDebounceTime);
+
+      oled.print(" lst: ");
+      oled.print(lastButtonState);
+      oled.print("ltch: ");
+      oled.println(latchState);
+    }
+  }
+    lastButtonState = reading;
+}
+
+void latchStateToggle(byte button, short int latch) {
+      if (button != 1) {
+        return;
+      }
+        latchState = latch*-1;   // Invert latchState
 }
